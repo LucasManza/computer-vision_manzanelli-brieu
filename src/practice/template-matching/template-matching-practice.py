@@ -23,20 +23,34 @@ def cut_roi_img(frame, size: int):
     return roi
 
 
-def matching_template(image, template, method):
+red_color = (0, 0, 255)
+blue_color = (255, 0, 0)
+
+
+class TemplateMethods:
+    SQ_DIFF = 'cv2.TM_SQDIFF_NORMED'
+    CORR = 'cv2.TM_CCORR_NORMED'
+
+
+def matching_template(image, template, method: str):
     res = cv2.matchTemplate(image, template, eval(method))
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+    color = red_color
     top_left = min_loc
+
+    if method == TemplateMethods.CORR:
+        color = blue_color
+        top_left = max_loc
+
     bottom_right = (top_left[0] + rectangle_size, top_left[1] + rectangle_size)
-    return top_left, bottom_right, blue_color
+    return top_left, bottom_right, color
 
 
 # EXECUTION
 
-current_method: str = 'cv2.TM_SQDIFF_NORMED'
+current_method: str = TemplateMethods.SQ_DIFF
 roi = None
 frame = None
-blue_color = (255, 0, 0)
 rectangle_size: int = 100
 
 cap = cv2.VideoCapture(0)
@@ -53,6 +67,11 @@ while True:
 
     if cv2.waitKey(1) == ord('1'):
         roi = cut_roi_img(frame, rectangle_size)
+        current_method = TemplateMethods.SQ_DIFF
+
+    if cv2.waitKey(1) == ord('2'):
+        roi = cut_roi_img(frame, rectangle_size)
+        current_method = TemplateMethods.CORR
 
     if roi is not None:
         matching_tuple = matching_template(roi, frame, current_method)
