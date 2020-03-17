@@ -23,9 +23,12 @@ def cut_roi_img(frame, size: int):
     return roi
 
 
-class MatchTemplateMethod(enum.Enum):
-    CORR = 'TM_CCORR_NORMED',
-    DIFF_SQR = 'TM_SQDIFF_NORMED'
+def matching_template(image, template, method):
+    res = cv2.matchTemplate(image, template, eval(method))
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+    top_left = min_loc
+    bottom_right = (top_left[0] + rectangle_size, top_left[1] + rectangle_size)
+    return top_left, bottom_right, blue_color
 
 
 # EXECUTION
@@ -52,12 +55,8 @@ while True:
         roi = cut_roi_img(frame, rectangle_size)
 
     if roi is not None:
-        res = cv2.matchTemplate(roi, frame, eval(current_method))
-        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-        top_left = min_loc
-        bottom_right = (top_left[0] + rectangle_size, top_left[1] + rectangle_size)
-
-        frame = cv2.rectangle(frame, top_left, bottom_right, blue_color, 2)
+        matching_tuple = matching_template(roi, frame, current_method)
+        frame = cv2.rectangle(frame, matching_tuple[0], matching_tuple[1], matching_tuple[2], 2)
 
     # Display the resulting frame
     cv2.imshow('frame', frame)
