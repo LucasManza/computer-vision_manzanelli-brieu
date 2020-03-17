@@ -1,6 +1,6 @@
-import numpy as np
+import enum
 import cv2
-import datetime
+from matplotlib import pyplot as plt
 
 
 # 1)Al pulsar una tecla, obtener la plantilla recortando un cuadrado de 100 x 100 píxeles
@@ -11,8 +11,9 @@ import datetime
 # dibujar un recuadro de 100 x 100 sobre la imagen original, señalando la detección
 # 4) Repetir usando dos plantillas sobre la cámara, recuadrando la detección con diferente color
 
-def CutROIImg(frame, size: int):
-    (height, width) = frame.shape[::-1]
+def cut_roi_img(frame, size: int):
+    height = frame.shape[0]
+    width = frame.shape[1]
     min_height: int = int(height / 2 - size)
     max_height: int = int(height / 2 + size)
     min_width: int = int(width / 2 - size)
@@ -22,28 +23,45 @@ def CutROIImg(frame, size: int):
     return roi
 
 
+class MatchTemplateMethod(enum.Enum):
+    CORR = 'TM_CCORR_NORMED',
+    DIFF_SQR = 'TM_SQDIFF_NORMED'
+
+
+# EXECUTION
+
+current_method: str = 'cv2.TM_SQDIFF_NORMED'
+roi = None
+frame = None
+blue_color = (255, 0, 0)
+rectangle_size: int = 100
+
 cap = cv2.VideoCapture(0)
 
 while True:
+
+    if cv2.waitKey(1) == ord('q'):
+        break
+
     # Capture frame-by-frame
     ret, frame = cap.read()
 
     frame = cv2.flip(frame, 1)
-    # Our operations on the frame come here
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    if cv2.waitKey(1) == ord('1'):
+        roi = cut_roi_img(frame, rectangle_size)
+
+    if roi is not None:
+        res = cv2.matchTemplate(roi, frame, eval(current_method))
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+        top_left = min_loc
+        bottom_right = (top_left[0] + rectangle_size, top_left[1] + rectangle_size)
+
+        frame = cv2.rectangle(frame, top_left, bottom_right, blue_color, 2)
 
     # Display the resulting frame
     cv2.imshow('frame', frame)
-    if cv2.waitKey(1) == ord('c'):
-        CutROIImg(frame, 100)
-
-    if cv2.waitKey(1) == ord('w'):
-        time = datetime.datetime.now()
-        cv2.imwrite('../assets/threshold-img.png', frame)
-    if cv2.waitKey(1) == ord('q'):
-        break
 
 # When everything done, release the capture
 cap.release()
 cv2.destroyAllWindows()
-
