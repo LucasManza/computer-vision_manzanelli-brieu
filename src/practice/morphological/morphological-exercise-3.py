@@ -1,10 +1,9 @@
 import cv2
-import numpy as np
 
 
 # todo Ejercicios con la cámara, en tiempo real, mostrando siempre en una ventana la imagen de la cámara.
 #  Requiere imágenes binarias, que se pueden obtener por thresholding.
-#  1) Dilatar una imagen binaria, controlar el tamaño del elemento estructural con un trackbar, de 1 a 50
+#  2) Erosionar
 
 # Generate binary image.
 def generate_binary_image(image, threshold: int):
@@ -15,11 +14,13 @@ def generate_binary_image(image, threshold: int):
     return binary
 
 
-# SHOW dilation image by using Ellipsis structure. Args must be de binary image and structure size
-def show_dilation_image(binary_img, structure_size):
-    dilatation_structure = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (structure_size, structure_size))
-    dilatation_img = cv2.morphologyEx(binary_img, cv2.MORPH_DILATE, dilatation_structure)
-    cv2.imshow('dilation image', dilatation_img)
+def reduce_noise(binary_img, structure_size):
+    structure = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (structure_size, structure_size))
+    result = binary_img
+    for x in range(100):
+        open_img = cv2.morphologyEx(binary_img, cv2.MORPH_OPEN, structure)
+        result = cv2.morphologyEx(open_img, cv2.MORPH_CLOSE, structure)
+    cv2.imshow('reduce image image', result)
 
 
 def nothing(x):
@@ -34,7 +35,7 @@ if __name__ == '__main__':
 
     cv2.namedWindow("Window", cv2.WINDOW_AUTOSIZE)
     cv2.createTrackbar("Threshold", "Window", threshold, 255, nothing)
-    cv2.createTrackbar("Dilatation Structure Size", "Window", dilation_struct_size, 50, nothing)
+    cv2.createTrackbar("Erode Structure Size", "Window", dilation_struct_size, 50, nothing)
 
     while True:
 
@@ -45,7 +46,7 @@ if __name__ == '__main__':
         ret, frame = cap.read()
 
         threshold = cv2.getTrackbarPos("Threshold", "Window")
-        dilation_struct_size = cv2.getTrackbarPos("Dilatation Structure Size", "Window")
+        dilation_struct_size = cv2.getTrackbarPos("Erode Structure Size", "Window")
         dilation_struct_size = 1 if dilation_struct_size < 2 else dilation_struct_size
 
         # Display the resulting frame
@@ -53,7 +54,7 @@ if __name__ == '__main__':
 
         bin_img = generate_binary_image(frame, threshold)
 
-        show_dilation_image(bin_img, dilation_struct_size)
+        reduce_noise(bin_img, dilation_struct_size)
 
     # When everything done, release the capture
     cap.release()
