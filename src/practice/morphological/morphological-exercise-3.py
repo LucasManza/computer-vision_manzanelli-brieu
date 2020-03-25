@@ -16,10 +16,8 @@ def generate_binary_image(image, threshold: int):
 
 def reduce_noise(binary_img, structure_size):
     structure = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (structure_size, structure_size))
-    result = binary_img
-    for x in range(100):
-        open_img = cv2.morphologyEx(binary_img, cv2.MORPH_OPEN, structure)
-        result = cv2.morphologyEx(open_img, cv2.MORPH_CLOSE, structure)
+    open_img = cv2.morphologyEx(binary_img, cv2.MORPH_OPEN, structure)
+    result = cv2.morphologyEx(open_img, cv2.MORPH_CLOSE, structure)
     cv2.imshow('reduce image image', result)
 
 

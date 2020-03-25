@@ -1,0 +1,8 @@
+Ejercicios con la cámara, en tiempo real, mostrando siempre en una ventana la imagen de la cámara.
+  Requiere imágenes binarias sin ruido, que se pueden obtener por thresholding y operaciones morfológicas con sus respectivos trackbars.
+1) Aplicar componentes conectados a la imagen binaria de la cámara,
+ y visualizarla coloreando con un color diferente cada grupo,
+  usando colorMap
+2) Ídem anterior, pero colorear sobre la imagen original de la cámara en lugar de la imagen binaria
+3) Sobre la imagen de la cámara marcar el centroide de todos los grupos obtenidos por componentes conectados,
+ y recuadrar solamente los que tienen un área menor a 10.000 píxeles y mayor a 100 píxeles.
