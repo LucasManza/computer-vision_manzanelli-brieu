@@ -29,7 +29,7 @@ def show_connected_components(binary_image):
     # color_map_img = cv2.applyColorMap(img_int, cv2.COLORMAP_HSV)
     # cv2.imshow('component', color_map_img)
 
-    num_labels, labels = cv2.connectedComponents(binary_image)
+    num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(binary_image)
     binaryImageClone = np.copy(labels)
 
     # Find the max and min pixel values and their locations
@@ -43,6 +43,15 @@ def show_connected_components(binary_image):
 
     # Apply a color map
     img_color_map = cv2.applyColorMap(binaryImageClone, cv2.COLORMAP_JET)
+
+    for label in labels:
+        pixels = stats[label, cv2.CC_STAT_AREA]
+        if 10000 > pixels > 100:
+            centroid = centroids[label]
+            start_point = (centroid[0] - 100, centroid[1] - 100)
+            end_point = (centroid[0] + 100, centroid[1] + 100)
+            img_color_map = cv2.rectangle(img_color_map, start_point, end_point)
+
     cv2.imshow('component', img_color_map)
 
 
