@@ -9,7 +9,7 @@ import numpy as np
 def generate_binary_image(image, threshold: int):
     gray_frame = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    ret, binary = cv2.threshold(gray_frame, threshold, 255, cv2.THRESH_BINARY_INV)
+    ret, binary = cv2.threshold(gray_frame, threshold, 255, cv2.THRESH_BINARY)
 
     return binary
 
@@ -23,12 +23,6 @@ def reduce_noise(binary_img, structure_size):
 
 
 def show_connected_components(binary_image):
-    # num_labels, labels = cv2.connectedComponents(binary_image)
-    # img_int = np.uint8(labels)
-    #
-    # color_map_img = cv2.applyColorMap(img_int, cv2.COLORMAP_HSV)
-    # cv2.imshow('component', color_map_img)
-
     num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(binary_image)
     binaryImageClone = np.copy(labels)
 
@@ -44,13 +38,23 @@ def show_connected_components(binary_image):
     # Apply a color map
     img_color_map = cv2.applyColorMap(binaryImageClone, cv2.COLORMAP_JET)
 
+    red_color = (0, 0, 255)
+    blue_color = (255, 0, 0)
+
+    # print(stats[labels[2], cv2.CC_STAT_AREA][0])
+    # print(centroids[labels[2]][0])
+
     for label in labels:
-        pixels = stats[label, cv2.CC_STAT_AREA]
-        if 10000 > pixels > 100:
-            centroid = centroids[label]
-            start_point = (centroid[0] - 100, centroid[1] - 100)
-            end_point = (centroid[0] + 100, centroid[1] + 100)
-            img_color_map = cv2.rectangle(img_color_map, start_point, end_point)
+        ### Get area from a matrix of same value
+        pixels = stats[label, cv2.CC_STAT_AREA][0]
+        print(pixels)
+        ### Exercise condition request
+        if 100 < pixels < 10000:
+            ### Get centroid from a matrix of same value
+            centroid = centroids[label][0]
+            top_left_point = (int(centroid[0] - 100), int(centroid[1] + 100))
+            bottom_right_point = (int(centroid[0] + 100), int(centroid[1] - 100))
+            img_color_map = cv2.rectangle(img_color_map, top_left_point, bottom_right_point, red_color, 2)
 
     cv2.imshow('component', img_color_map)
 
@@ -60,7 +64,8 @@ def nothing(x):
 
 
 if __name__ == '__main__':
-    origin_img = cv2.imread('../../assets/numbers.png')
+    cap = cv2.VideoCapture(0)
+    # origin_img = cv2.imread('../../assets/numbers.png')
     threshold = 127
     dilation_struct_size = 1
 
@@ -74,15 +79,16 @@ if __name__ == '__main__':
             break
 
         # Capture frame-by-frame
+        ret, frame = cap.read()
 
         threshold = cv2.getTrackbarPos("Threshold", "Window")
         dilation_struct_size = cv2.getTrackbarPos("Erode Structure Size", "Window")
         dilation_struct_size = 1 if dilation_struct_size < 2 else dilation_struct_size
 
         # Display the resulting frame
-        cv2.imshow('Img', origin_img)
+        cv2.imshow('Img', frame)
 
-        bin_img = generate_binary_image(origin_img, threshold)
+        bin_img = generate_binary_image(frame, threshold)
 
         bin_img = reduce_noise(bin_img, dilation_struct_size)
         cv2.imshow('Binary Image', bin_img)
