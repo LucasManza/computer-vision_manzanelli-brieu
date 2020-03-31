@@ -1,4 +1,5 @@
 import cv2
+import numpy
 
 red_color = (0, 0, 255)
 blue_color = (255, 0, 0)
@@ -26,13 +27,15 @@ def draw_contours_img(original_img, contours):
     return img
 
 
-# Apply a rectangle detection by contours, instead of drawing the contour per se.
-def draw_contours_by_bounding_react(img, contours):
-    img_result = img
+# Apply a rectangle detection by contours area, instead of drawing the contour per se.
+def draw_contours_by_min_area_Rect(img, contours):
     for cont in contours:
-        x, y, w, h = cv2.boundingRect(cont)
-        cv2.rectangle(img, (x, y), (x + w, y + h), green_color, 2)
-    return img_result
+        rect = cv2.minAreaRect(cont)
+        box = cv2.boxPoints(rect)
+        box = numpy.int0(box)
+        img = cv2.drawContours(img, [box], 0, green_color, 2)
+
+    return img
 
 
 def find_contours(binary_img):
@@ -84,7 +87,7 @@ if __name__ == '__main__':
         cv2.imshow('contours_img', contours_img)
 
         # Draw contours and show them in red
-        contours_img = draw_contours_by_bounding_react(contours_img, contours)
+        contours_img = draw_contours_by_min_area_Rect(contours_img, contours)
         cv2.imshow('special', contours_img)
 
     # When everything done, release the capture

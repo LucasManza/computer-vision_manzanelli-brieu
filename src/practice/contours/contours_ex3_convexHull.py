@@ -26,13 +26,13 @@ def draw_contours_img(original_img, contours):
     return img
 
 
-# Apply a rectangle detection by contours, instead of drawing the contour per se.
-def draw_contours_by_bounding_react(img, contours):
-    img_result = img
+# Make segments lines instead a contours
+def draw_contours_by_convex_hull(img, contours):
+    hull_list: list = []
     for cont in contours:
-        x, y, w, h = cv2.boundingRect(cont)
-        cv2.rectangle(img, (x, y), (x + w, y + h), green_color, 2)
-    return img_result
+        hull_list.append(cv2.convexHull(cont))
+
+    return cv2.drawContours(img, hull_list, -1, green_color, 2)
 
 
 def find_contours(binary_img):
@@ -84,7 +84,7 @@ if __name__ == '__main__':
         cv2.imshow('contours_img', contours_img)
 
         # Draw contours and show them in red
-        contours_img = draw_contours_by_bounding_react(contours_img, contours)
+        contours_img = draw_contours_by_convex_hull(contours_img, contours)
         cv2.imshow('special', contours_img)
 
     # When everything done, release the capture
