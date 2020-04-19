@@ -16,11 +16,21 @@ def erode(binary_img, structure_size):
     return erode_img
 
 
-def opening(binary_img, structure_size):
+def __opening__(binary_img, structure_size):
     morph_structure = __generate_morph_structure__(structure_size)
     return cv2.morphologyEx(binary_img, cv2.MORPH_OPEN, morph_structure)
 
 
-def closing(binary_img, structure_size):
+def __closing__(binary_img, structure_size):
     morph_structure = __generate_morph_structure__(structure_size)
-    return cv2.morphologyEx(binary_img, cv2.MORPH_OPEN, morph_structure)
+    return cv2.morphologyEx(binary_img, cv2.MORPH_CLOSE, morph_structure)
+
+
+def reduce_noise_dil_closing(binary_img, structure_size):
+    dil_img = dilation(binary_img, structure_size)
+    return __closing__(dil_img, structure_size)
+
+
+def reduce_noise_erode_opening(binary_img, structure_size):
+    erode_img = erode(binary_img, structure_size)
+    return __opening__(erode_img, structure_size)
