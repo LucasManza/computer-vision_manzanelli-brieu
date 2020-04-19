@@ -9,7 +9,7 @@ while True:
     ret, frame = cap.read()
 
     frame = cv2.flip(frame, 1)
-    # Our operations on the frame come here
+    # Our image_operators on the frame come here
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # Display the resulting frame

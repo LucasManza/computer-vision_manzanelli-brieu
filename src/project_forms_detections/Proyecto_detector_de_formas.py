@@ -5,7 +5,7 @@ import numpy as np
 #Variables section
 blockSizeMaxGauss=150
 
-max_elem = 2#Max number of diferent types of elements for morphologic operations
+max_elem = 2#Max number of diferent types of elements for morphologic image_operators
 max_kernel_size = 50
 
 title_trackbar_kernel_size1 = 'Opening Kernel size:\n 2n +1'
