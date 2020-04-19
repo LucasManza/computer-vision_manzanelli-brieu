@@ -3,6 +3,7 @@ import cv2
 from project_forms_detections.image_operators import threshold_operators as threshold_operators
 from project_forms_detections.image_operators import morphological_operators as morph_operators
 
+analyze_window_name : str = 'Analyze Window'
 
 def nothing(x):
     pass
@@ -14,9 +15,9 @@ if __name__ == '__main__':
     threshold = 127
     morph_struct_size = 10
 
-    cv2.namedWindow("Window", cv2.WINDOW_AUTOSIZE)
-    cv2.createTrackbar("Threshold", "Window", threshold, 255, nothing)
-    cv2.createTrackbar("Structure Size", "Window", morph_struct_size, 50, nothing)
+    cv2.namedWindow(analyze_window_name, cv2.WINDOW_AUTOSIZE)
+    cv2.createTrackbar("Threshold", analyze_window_name, threshold, 255, nothing)
+    cv2.createTrackbar("Structure Size", analyze_window_name, morph_struct_size, 50, nothing)
 
     while True:
 
@@ -26,8 +27,8 @@ if __name__ == '__main__':
         # Capture frame-by-frame
         ret, frame = cap.read()
 
-        threshold = cv2.getTrackbarPos("Threshold", "Window")
-        morph_struct_size = cv2.getTrackbarPos("Structure Size", "Window")
+        threshold = cv2.getTrackbarPos("Threshold", analyze_window_name)
+        morph_struct_size = cv2.getTrackbarPos("Structure Size", analyze_window_name)
         morph_struct_size = 1 if morph_struct_size < 2 else morph_struct_size
 
         # Display the resulting frame
@@ -35,11 +36,11 @@ if __name__ == '__main__':
 
         # Generate monochromatic image
         bin_img = threshold_operators.generate_binary_image(frame, threshold)
-        
+
         # Clean monochromatic by reduce noise using dilation and closing morph operators
         bin_clean_img = morph_operators.reduce_noise_dil_closing(bin_img, morph_struct_size)
 
-        cv2.imshow('analyze_img', bin_clean_img)
+        cv2.imshow(analyze_window_name, bin_clean_img)
 
     # When everything done, release the capture
     cap.release()
