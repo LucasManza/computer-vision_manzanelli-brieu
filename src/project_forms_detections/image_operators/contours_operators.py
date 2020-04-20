@@ -37,7 +37,7 @@ def draw_rec_contour(img, contour, colour):
 
 
 def filter_contours_by_match_contours(contours, target_contour, match_error: float):
-    if target_contour is None: return []
+    if target_contour is None or target_contour.__len__() == 0: return []
     cont_results = []
 
     for c in contours:
