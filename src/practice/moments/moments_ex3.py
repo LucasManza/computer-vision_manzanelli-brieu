@@ -103,7 +103,7 @@ if __name__ == '__main__':
 
         # ret, frame = cap.read()
 
-        # frame = cv2.imread('../../assets/star-image.png')
+        # frame = cv2.imread('../../assets/start.png')
         frame = cv2.imread('../../assets/dataset/start/2.png')
 
         if cv2.waitKey(1) == ord('i'):

@@ -32,7 +32,7 @@ def generate_dataset(image, img_target: str):
 
 
 if __name__ == '__main__':
-    star_img = cv2.imread('../../../assets/star-image.png')
+    star_img = cv2.imread('../../../assets/star.png')
     cv2.imshow('', star_img)
 # target: str = '../../../assets/dataset/start/'
 # generate_dataset(star_img, target)

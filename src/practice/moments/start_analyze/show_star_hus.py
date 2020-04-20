@@ -1,7 +1,7 @@
 import practice.moments.start_analyze.hu_img_analyze as hu_analyze
 import cv2
 
-star_src: str = '../../../assets/star-image.png'
+star_src: str = '../../../assets/star.png'
 star_dataset: [str] = [
     '../../../assets/dataset/star/1.png',
     '../../../assets/dataset/star/2.png',

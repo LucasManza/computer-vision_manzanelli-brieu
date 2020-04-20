@@ -1,8 +1,19 @@
 import cv2
+from enum import Enum
 
 
-def find_contours(binary_img):
-    contours, _ = cv2.findContours(binary_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+class DetectionContourEnum(Enum):
+    EXTERNAL_CONT_DETECT = 1
+    TREE_CONT_DETECT = 2
+
+
+def find_contours(binary_img, detection_type: DetectionContourEnum = DetectionContourEnum.TREE_CONT_DETECT):
+    if detection_type == DetectionContourEnum.EXTERNAL_CONT_DETECT:
+        detection_type = cv2.RETR_EXTERNAL
+    elif detection_type == DetectionContourEnum.TREE_CONT_DETECT:
+        detection_type = cv2.RETR_TREE
+
+    contours, _ = cv2.findContours(binary_img, detection_type, cv2.CHAIN_APPROX_SIMPLE)
     return contours
 
 
@@ -16,6 +27,22 @@ def draw_contours(img, contours, colour):
 def draw_contours_rect(img, contours, colour):
     copy_img = img.copy()
     for cont in contours:
-        x, y, w, h = cv2.boundingRect(cont)
-        cv2.rectangle(copy_img, (x, y), (x + w, y + h), colour, 2)
+        draw_rec_contour(copy_img, cont, colour)
     return copy_img
+
+
+def draw_rec_contour(img, contour, colour):
+    x, y, w, h = cv2.boundingRect(contour)
+    cv2.rectangle(img, (x, y), (x + w, y + h), colour, 2)
+
+
+def filter_contours_by_match_contours(contours, target_contour, match_error: float):
+    if target_contour is None: return []
+    cont_results = []
+
+    for c in contours:
+        match_result = cv2.matchShapes(c, target_contour, cv2.CONTOURS_MATCH_I3, 0)
+        if match_result < match_error:
+            cont_results.append(c)
+
+    return cont_results

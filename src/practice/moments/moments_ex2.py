@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
         ret, frame = cap.read()
 
-        # frame = cv2.imread('../../assets/star-image.png')
+        # frame = cv2.imread('../../assets/start.png')
 
         if cv2.waitKey(1) == ord('i'):
             invert_bin_img = not invert_bin_img
