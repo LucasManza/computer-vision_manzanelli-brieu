@@ -34,15 +34,3 @@ def draw_contours_rect(img, contours, colour):
 def draw_rec_contour(img, contour, colour):
     x, y, w, h = cv2.boundingRect(contour)
     cv2.rectangle(img, (x, y), (x + w, y + h), colour, 2)
-
-
-def filter_contours_by_match_contours(contours, target_contour, match_error: float):
-    if target_contour is None or target_contour.__len__() == 0: return []
-    cont_results = []
-
-    for c in contours:
-        match_result = cv2.matchShapes(c, target_contour, cv2.CONTOURS_MATCH_I3, 0)
-        if match_result < match_error:
-            cont_results.append(c)
-
-    return cont_results

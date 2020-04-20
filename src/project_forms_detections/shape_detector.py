@@ -4,7 +4,7 @@ import cv2
 
 from project_forms_detections.colours.rgb.colours import green_colour, red_colour
 from src.project_forms_detections.image_analyzer import ImageAnalyzer
-from project_forms_detections.image_operators import contours_operators as contours_operators
+from project_forms_detections.image_operators import contours_operators as contours_operators, filters
 
 
 def __show_contours__(image, contours):
@@ -65,9 +65,8 @@ if __name__ == '__main__':
 
         camera_analyzer.update(__select_img__(show_binary_images, frame, bin_img_camera, contours_camera))
 
-        contours_result = contours_operators \
-            .filter_contours_by_match_contours(contours_camera, contours_target[0], 0.01)
-
+        contours_result = filters.contours_distance(contours_camera, contours_target[0], 0.01)
+        contours_result = filters.contours_area(contours_result, 100, 10000)
         __show_shapes_detection__(frame, contours_result)
 
     # When everything done, release the capture
