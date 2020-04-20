@@ -5,7 +5,7 @@ from project_forms_detections.image_operators import morphological_operators as 
 from project_forms_detections.image_operators import threshold_operators as threshold_operators
 
 
-class ImageAnalyzer:
+class ImageSettings:
     def __init__(self, window_name):
         self.threshold = 127
         self.morph_struct_size = 10
@@ -30,15 +30,3 @@ class ImageAnalyzer:
     def update(self, image):
         self.__update_values__()
         cv2.imshow(self.window_name, image)
-
-    def analyze_image(self, image, invert_image=False):
-        # Generate monochromatic image
-        bin_img = threshold_operators.generate_binary_image(image, self.threshold, invert_image)
-
-        # Clean monochromatic by reduce noise using dilation and closing morph operators
-        bin_clean_img = morph_operators.reduce_noise_dil_closing(bin_img, self.morph_struct_size)
-
-        # Find contours over a binary image (clean)
-        contours = contours_operators.find_contours(bin_clean_img)
-
-        return bin_clean_img, contours

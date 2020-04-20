@@ -27,6 +27,7 @@ def __closing__(binary_img, structure_size):
 
 
 def reduce_noise_dil_closing(binary_img, structure_size):
+    """"Reduce Noise by applying dilation and closing ("""
     dil_img = dilation(binary_img, structure_size)
     return __closing__(dil_img, structure_size)
 

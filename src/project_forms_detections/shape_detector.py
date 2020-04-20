@@ -3,8 +3,11 @@ from enum import Enum
 import cv2
 
 from project_forms_detections.colours.rgb.colours import green_colour, red_colour
-from src.project_forms_detections.image_analyzer import ImageAnalyzer
-from project_forms_detections.image_operators import contours_operators as contours_operators, filters
+from project_forms_detections.image_operators.contours_operators import DetectionContourEnum
+from src.project_forms_detections.image_analyzer import ImageSettings
+from project_forms_detections.image_operators import threshold_operators as  threshold_operators, filters
+from project_forms_detections.image_operators import morphological_operators as  morph_operators
+from project_forms_detections.image_operators import contours_operators as  contours_operators
 
 
 def __show_contours__(image, contours):
@@ -32,8 +35,8 @@ if __name__ == '__main__':
 
     img_target = cv2.imread('../assets/star.png')
 
-    camera_analyzer = ImageAnalyzer('Camera Analyzer Window')
-    target_analyzer = ImageAnalyzer('Target Analyzer Window')
+    camera_settings = ImageSettings('Camera Analyzer Window')
+    target_settings = ImageSettings('Target Analyzer Window')
 
     show_binary_images = True
 
@@ -54,20 +57,45 @@ if __name__ == '__main__':
             show_binary_images = not show_binary_images
 
         # Capture frame-by-frame
-        ret, frame = cap.read()
+        ret, camera_image = cap.read()
 
-        # Generate for TARGET Image, bin image and contours
-        (bin_img_target, contours_target) = target_analyzer.analyze_image(img_target, invert_image=target_invert_img)
+        # Generate monochromatic image for Target Image
+        target_binary_image = threshold_operators \
+            .generate_binary_image(img_target, target_settings.threshold, target_invert_img)
 
-        target_analyzer.update(__select_img__(show_binary_images, img_target, bin_img_target, contours_target))
+        # Generate monochromatic image for Camera Image
+        camera_binary_image = threshold_operators \
+            .generate_binary_image(camera_image, camera_settings.threshold, camera_invert_img)
 
-        (bin_img_camera, contours_camera) = camera_analyzer.analyze_image(frame, invert_image=camera_invert_img)
+        # Clean binary target image by erosion
+        target_binary_image = morph_operators. \
+            erode(target_binary_image, target_settings.morph_struct_size)
 
-        camera_analyzer.update(__select_img__(show_binary_images, frame, bin_img_camera, contours_camera))
+        # Clean binary camera image by closing reduce noise
+        camera_binary_image = morph_operators \
+            .reduce_noise_erode_opening(camera_binary_image, camera_settings.morph_struct_size)
 
-        contours_result = filters.contours_distance(contours_camera, contours_target[0], 0.01)
+        # Target contours
+        target_contours = contours_operators.find_contours(target_binary_image,
+                                                           DetectionContourEnum.EXTERNAL_CONT_DETECT)
+
+        # Target contours
+        camera_contours = contours_operators.find_contours(camera_binary_image)
+
+        # Update settings methods and show image option for target
+        target_settings.update(__select_img__(show_binary_images, img_target, target_binary_image, target_contours))
+
+        # Idem for camera
+        camera_settings.update(__select_img__(show_binary_images, camera_image, camera_binary_image, camera_contours))
+
+        # Match contour detection with target, by filtering camera contours
+        contours_result = filters.contours_distance(camera_contours, target_contours[0], 0.01)
+
+        # Filter outliers contours with a spefic min and max amount of area pixels
         contours_result = filters.contours_area(contours_result, 100, 10000)
-        __show_shapes_detection__(frame, contours_result)
+
+        # It's show a new window all possible results
+        __show_shapes_detection__(camera_image, contours_result)
 
     # When everything done, release the capture
     cap.release()
