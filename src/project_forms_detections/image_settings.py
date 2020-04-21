@@ -1,14 +1,10 @@
 import cv2
 
-from project_forms_detections.image_operators import contours_operators as contours_operators
-from project_forms_detections.image_operators import morphological_operators as morph_operators
-from project_forms_detections.image_operators import threshold_operators as threshold_operators
-
 
 class ImageSettings:
-    def __init__(self, window_name):
-        self.threshold = 127
-        self.morph_struct_size = 10
+    def __init__(self, window_name, threshold=127, morph_struct_size=1):
+        self.threshold = threshold
+        self.morph_struct_size = morph_struct_size if morph_struct_size > 1 else 1
         self.approx_poly_dp = 1
         self.window_name: str = window_name
         self.__generate_trackbars__()
