@@ -5,7 +5,7 @@ import cv2
 from project_forms_detections.colours.rgb.colours import green_colour, red_colour
 from project_forms_detections.image_operators.contours_operators import DetectionContourEnum
 from src.project_forms_detections.image_settings import ImageSettings
-from project_forms_detections.image_operators import threshold_operators as  threshold_operators, filters
+from project_forms_detections.image_operators import threshold_operators as  threshold_operators
 from project_forms_detections.image_operators import morphological_operators as  morph_operators
 from project_forms_detections.image_operators import contours_operators as  contours_operators
 
@@ -89,10 +89,10 @@ if __name__ == '__main__':
         camera_settings.update(__select_img__(show_binary_images, camera_image, camera_binary_image, camera_contours))
 
         # Match contour detection with target, by filtering camera contours
-        contours_result = filters.contours_distance(camera_contours, target_contours[0], 0.01)
+        contours_result = contours_operators.filter_by_distance(camera_contours, target_contours[0], 0.01)
 
         # Filter outliers contours with a specific min and max amount of area pixels
-        contours_result = filters.contours_area(contours_result, 500, 10000)
+        contours_result = contours_operators.filter_by_area(contours_result, 500, 10000)
 
         # It's show a new window all possible results
         __show_shapes_detection__(camera_image, contours_result)

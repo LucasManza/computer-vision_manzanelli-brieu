@@ -27,10 +27,28 @@ def draw_contours(img, contours, colour):
 def draw_contours_rect(img, contours, colour):
     copy_img = img.copy()
     for cont in contours:
-        draw_rec_contour(copy_img, cont, colour)
+        draw_contour_rect(copy_img, cont, colour)
     return copy_img
 
 
-def draw_rec_contour(img, contour, colour):
+def draw_contour_rect(img, contour, colour):
     x, y, w, h = cv2.boundingRect(contour)
     cv2.rectangle(img, (x, y), (x + w, y + h), colour, 2)
+
+
+def compare_contours(contour, target_contour):
+    return cv2.matchShapes(contour, target_contour, cv2.CONTOURS_MATCH_I3, 0)
+
+
+def filter_by_distance(contours, target_contour, match_error: float):
+    """"
+    Filter a list of contours by comparing distance with the target's contours.
+
+    """
+    if target_contour is None or target_contour.__len__() == 0: return []
+
+    return list(filter(lambda x: compare_contours(x, target_contour) <= match_error, contours))
+
+
+def filter_by_area(contours, min_pixels: int, max_pixels: max):
+    return list(filter(lambda x: min_pixels < cv2.contourArea(x) < max_pixels, contours))
