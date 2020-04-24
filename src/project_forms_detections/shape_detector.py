@@ -92,7 +92,7 @@ if __name__ == '__main__':
         contours_result = contours_operators.filter_by_distance(camera_contours, target_contours[0], 0.01)
 
         # Filter outliers contours with a specific min and max amount of area pixels
-        contours_result = contours_operators.filter_by_area(contours_result, 500, 10000)
+        contours_result = contours_operators.filter_by_area(contours_result, 2000, 10000)
 
         # It's show a new window all possible results
         __show_shapes_detection__(camera_image, contours_result)
