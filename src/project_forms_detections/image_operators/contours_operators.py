@@ -23,8 +23,10 @@ def draw_contours(img, contours, colour):
     return copy_img
 
 
-# Apply a rectangle detection by contours, instead of drawing the contour per se.
 def draw_contours_rect(img, contours, colour):
+    """"
+    Apply a rectangle detection by contours, instead of drawing the contour per se.
+    """
     copy_img = img.copy()
     for cont in contours:
         draw_contour_rect(copy_img, cont, colour)
@@ -45,7 +47,7 @@ def filter_by_distance(contours, target_contour, match_error: float):
     Filter a list of contours by comparing distance with the target's contours.
 
     """
-    if target_contour is None or target_contour.__len__() == 0: return []
+    if target_contour is None : return []
 
     return list(filter(lambda x: compare_contours(x, target_contour) <= match_error, contours))
 

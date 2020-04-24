@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
     img_target = cv2.imread('../assets/star.png')
 
-    camera_settings = ImageSettings('Camera Analyzer Window', morph_struct_size=6)
+    camera_settings = ImageSettings('Camera Analyzer Window', morph_struct_size=4)
     target_settings = ImageSettings('Target Analyzer Window')
 
     show_binary_images = True
