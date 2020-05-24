@@ -1,6 +1,7 @@
-import numpy as np
 import cv2 as cv
-import glob
+import numpy as np
+
+from project_robotic_vision.calibration import camera_calibration
 
 if __name__ == '__main__':
     CHESSBOARD_SIZE = (6, 7)
@@ -22,22 +23,11 @@ if __name__ == '__main__':
             break
 
         ret, frame = cap.read()
-
-        img = frame
+        frame = cv.flip(frame, 1)
 
         if cv.waitKey(1) == ord('c'):
-            gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-            # Find the chess board corners
-            ret, corners = cv.findChessboardCorners(gray, CHESSBOARD_SIZE, None)
-            # If found, add object points, image points (after refining them)
-            if ret == True:
-                objpoints.append(objp)
-                corners2 = cv.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
-                imgpoints.append(corners)
-                # Draw and display the corners
-                cv.drawChessboardCorners(img, CHESSBOARD_SIZE, corners2, ret)
-                cv.imshow('calibration', img)
+            camera_calibration.calibrate(frame)
 
-        cv.imshow('img', img)
+        cv.imshow('WebCam', frame)
 
 cv.destroyAllWindows()
