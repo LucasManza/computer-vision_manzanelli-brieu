@@ -65,3 +65,12 @@ class HomographyTool:
         warped = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
         # return the warped image
         return warped
+
+    def draw_points(self, camera_img):
+        image = camera_img
+        for point in self.__2DPoints__:
+            image = cv2.circle(camera_img, point, radius=0, color=(0, 0, 255), thickness=5)
+        return image
+
+        # for point in self.__2DPoints__:
+        #     camera_img[point[0], point[1]] = [0, 0, 255]
