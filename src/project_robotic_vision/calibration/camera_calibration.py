@@ -35,6 +35,7 @@ def calibrate(camera_img, chessboard_size: (int, int) = (6, 7)):
 
     # Fixed undistortion
     dst = cv.undistort(camera_img, camera_matrix, distortion_coeff, None, new_camera_matrix)
-    cv.imshow('Undistored', dst)
+
+    cv.imshow('Undistortion', dst)
 
     return dst

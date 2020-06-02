@@ -15,6 +15,7 @@ if __name__ == '__main__':
     objpoints = []  # 3d point in real world space
     imgpoints = []  # 2d points in image plane.
 
+
     cap = cv.VideoCapture(0)
 
     while True:
@@ -27,6 +28,7 @@ if __name__ == '__main__':
 
         if cv.waitKey(1) == ord('c'):
             camera_calibration.calibrate(frame)
+
 
         cv.imshow('WebCam', frame)
 
