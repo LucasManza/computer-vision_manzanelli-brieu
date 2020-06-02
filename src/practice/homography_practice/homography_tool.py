@@ -23,7 +23,7 @@ def order_points(pts):
     return rect
 
 
-class HomograpyTool:
+class HomographyTool:
 
     def __init__(self):
         self.__2DPoints__ = []

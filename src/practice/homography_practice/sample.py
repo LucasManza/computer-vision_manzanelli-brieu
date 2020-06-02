@@ -1,8 +1,8 @@
 import cv2
 
-from practice.homography_practice.homography import HomograpyTool
+from practice.homography_practice.homography_tool import HomographyTool
 
-homographyTool = HomograpyTool()
+homographyTool = HomographyTool()
 
 
 def on_click(event, x, y, flags, param):
