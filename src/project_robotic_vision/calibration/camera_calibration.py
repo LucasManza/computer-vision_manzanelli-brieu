@@ -2,34 +2,10 @@ import math
 
 import cv2 as cv
 import numpy as np
-import glob
+import yaml
 
 
-def calibrate(camera_img, chessboard_size: (int, int) = (6, 7)):
-    # termination criteria
-    criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-    # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
-    objp = np.zeros((chessboard_size[0] * chessboard_size[1], 3), np.float32)
-    objp[:, :2] = np.mgrid[0:7, 0:6].T.reshape(-1, 2)
-    # Arrays to store object points and image points from all the images.
-    objpoints = []  # 3d point in real world space
-    imgpoints = []  # 2d points in image plane.
-    gray = cv.cvtColor(camera_img, cv.COLOR_BGR2GRAY)
-    # Find the chess board corners
-    ret, corners = cv.findChessboardCorners(gray, chessboard_size, None)
-    # If found, add object points, image points (after refining them)
-    if ret == False: return
-
-    objpoints.append(objp)
-    corners2 = cv.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
-    imgpoints.append(corners)
-    # Draw and display the corners
-    cv.drawChessboardCorners(camera_img, chessboard_size, corners2, ret)
-    cv.imshow('Detection_Calibration', camera_img)
-
-    # Get camera calibration params
-    ret, camera_matrix, distortion_coeff, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1],
-                                                                            None, None)
+def calibrate_image(camera_img):
     # Get camera image shape
     h, w = camera_img.shape[:2]
 
@@ -45,6 +21,7 @@ def calibrate(camera_img, chessboard_size: (int, int) = (6, 7)):
 
 
 def calibrate_camera(images, chessboard_size: (int, int) = (6, 7)):
+    print('--- Calibration in Proccess--')
     # termination criteria
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
     # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
@@ -67,6 +44,20 @@ def calibrate_camera(images, chessboard_size: (int, int) = (6, 7)):
             cv.drawChessboardCorners(img, (7, 6), corners2, ret)
             cv.imshow('img', img)
             cv.waitKey(500)
+
+    # Get camera calibration params
+    ret, camera_matrix, distortion_coeff, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1],
+                                                                            None, None)
+
+    camera_intrinsic_params = dict(
+        ret=ret,
+        camera_matrix=camera_matrix,
+        distortion_coeff=distortion_coeff,
+        rvecs=rvecs,
+        tvecs=tvecs,
+    )
+    with open('camera_intrinsic_params.yml', 'w') as outfile:
+        yaml.dump(camera_intrinsic_params, outfile, default_flow_style=False)
 
 
 def capture_cam_frame(dst_path: str, amount=50) -> list:
@@ -99,6 +90,7 @@ def capture_cam_frame(dst_path: str, amount=50) -> list:
 
 
 def load_images_from_folder(folder):
+    print('--- Loading images--')
     images = []
     for filename in cv.os.listdir(folder):
         img = cv.imread(cv.os.path.join(folder, filename))
@@ -108,10 +100,6 @@ def load_images_from_folder(folder):
 
 
 if __name__ == '__main__':
-    # print('1) For start capturing images: Press s')
-    # print('2) For start calibrate camera by images capture: Press c')
-    # print('3) Exit: Press q')
-    # Create a black image
     img = np.zeros((512, 512, 3), np.uint8)
 
     # Write some Text
