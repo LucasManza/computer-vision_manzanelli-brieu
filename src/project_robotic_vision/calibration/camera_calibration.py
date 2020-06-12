@@ -120,25 +120,37 @@ def __load_images_from_folder__(folder):
     return images
 
 
-if __name__ == '__main__':
-    img = np.zeros((512, 512, 3), np.uint8)
-
+def __write_line_instruction__(line, main_img, line_numb, spacing):
     # Write some Text
-    text = '1) For start capturing images: Press s\n2) For start calibrate camera by images capture: Press c\n3) Exit: Press q'
     font = cv.FONT_HERSHEY_SIMPLEX
-    bottomLeftCornerOfText = (0, 100)
-    fontScale = 0.3
+    bottomLeftCornerOfText = (30, 30 + line_numb * spacing)
+    fontScale = 0.6
     fontColor = (255, 255, 255)
     lineType = 2
 
-    cv.putText(img, text,
+    cv.putText(main_img, line,
                bottomLeftCornerOfText,
                font,
                fontScale,
                fontColor,
                lineType)
 
-    cv.imshow('Main', img)
+
+if __name__ == '__main__':
+    instruction_img = np.zeros((300, 700, 3), np.uint8)
+
+    lines: list = [
+        'Camera Intrinsic Params',
+        '1A) For starting capture chessboard images: Press \'s\'',
+        '1B) Capture chessboard image by: Pressing \'c\'',
+        '2) For start calibrate camera by images captured: Press \'c\'',
+        '3) Exit: Press \'q\'',
+        'Note: Pay Attention to your terminal response.',
+    ]
+    for num, line in enumerate(lines, start=1):
+        __write_line_instruction__(line, instruction_img, num, 40)
+
+    cv.imshow('Camera Intrinsic Params', instruction_img)
 
     while True:
         if cv.waitKey(1) == ord('q'):
