@@ -1,26 +1,40 @@
+import json
 import math
-
 import cv2 as cv
 import numpy as np
 import yaml
+
+camera_matrix = None
+distortion_coeff = None
+
+
+def load_intrinsic_params():
+    with open('camera_intrinsic_params.json') as json_file:
+        data = json.load(json_file)
+        global camera_matrix
+        camera_matrix = np.array(data['camera_matrix'])
+        print('-- Camera Matrix --')
+        print(camera_matrix)
+        global distortion_coeff
+        distortion_coeff = np.array(data['distortion_coeff'])
+        print('-- Distortion Coeff --')
+        print(distortion_coeff)
 
 
 def calibrate_image(camera_img):
     # Get camera image shape
     h, w = camera_img.shape[:2]
 
-    # Get fixed camera matrix and roi
+    # # Get fixed camera matrix and roi
     new_camera_matrix, roi = cv.getOptimalNewCameraMatrix(camera_matrix, distortion_coeff, (w, h), 1, (w, h))
-
-    # Fixed undistortion
+    #
+    # # Fixed undistortion
     dst = cv.undistort(camera_img, camera_matrix, distortion_coeff, None, new_camera_matrix)
-
-    cv.imshow('Undistortion', dst)
 
     return dst
 
 
-def calibrate_camera(images, chessboard_size: (int, int) = (6, 7)):
+def __calibrate_camera__(images, chessboard_size: (int, int) = (6, 7)):
     print('--- Calibration in Proccess--')
     # termination criteria
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -48,19 +62,26 @@ def calibrate_camera(images, chessboard_size: (int, int) = (6, 7)):
     # Get camera calibration params
     ret, camera_matrix, distortion_coeff, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1],
                                                                             None, None)
+    print("-- Camera Matrix --")
+    print(camera_matrix)
+    print("-- Distortion Coeff. --")
+    print(distortion_coeff)
 
-    camera_intrinsic_params = dict(
-        ret=ret,
-        camera_matrix=camera_matrix,
-        distortion_coeff=distortion_coeff,
-        rvecs=rvecs,
-        tvecs=tvecs,
-    )
-    with open('camera_intrinsic_params.yml', 'w') as outfile:
-        yaml.dump(camera_intrinsic_params, outfile, default_flow_style=False)
+    __save_as_json__(camera_matrix, distortion_coeff)
+
+    print("-- Calibration Finished! --")
 
 
-def capture_cam_frame(dst_path: str, amount=50) -> list:
+def __save_as_json__(cam_matrix, dist_coeff):
+    print("-- Writing JSON  --")
+    cam_matrix = cam_matrix.tolist()
+    dist_coeff = dist_coeff.tolist()
+    data = {"distortion_coeff": dist_coeff, "camera_matrix": cam_matrix}
+    with open("camera_intrinsic_params.json", "w") as f:
+        json.dump(data, f)
+
+
+def __capture_cam_frame__(dst_path: str, amount=50) -> list:
     print('--- START CAPTURE IMAGES ---')
     print('Press C continually for capturing images')
     cap = cv.VideoCapture(0)
@@ -82,14 +103,14 @@ def capture_cam_frame(dst_path: str, amount=50) -> list:
         if capturing and frameId % math.floor(frameRate) == 0:
             cv.imwrite(dst_path + '/cap_c' + str(count) + '.png', frame)
             count = count + 1
-            print('Saving image ' + count)
+            print('Saving image ' + str(count))
             capturing = count % 5 == 0
 
     print('---CAPTURE IMAGE---')
     return images_capture
 
 
-def load_images_from_folder(folder):
+def __load_images_from_folder__(folder):
     print('--- Loading images--')
     images = []
     for filename in cv.os.listdir(folder):
@@ -124,10 +145,10 @@ if __name__ == '__main__':
             break
 
         elif cv.waitKey(1) == ord('s'):
-            capture_cam_frame('caps', 50)
+            __capture_cam_frame__('caps', 50)
 
         elif cv.waitKey(1) == ord('c'):
-            images = load_images_from_folder('caps')
-            calibrate_camera(images)
+            images = __load_images_from_folder__('caps')
+            __calibrate_camera__(images)
 
     cv.destroyAllWindows()
