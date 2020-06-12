@@ -33,7 +33,7 @@ def __show_shapes_detection__(camera_frame, contours_result):
 if __name__ == '__main__':
     cap = cv2.VideoCapture(0)
 
-    img_target = cv2.imread('../assets/star.png')
+    img_target = cv2.imread('../assets/circle-img.png')
 
     camera_settings = ImageSettings('Camera Analyzer Window', morph_struct_size=4)
     target_settings = ImageSettings('Target Analyzer Window')
