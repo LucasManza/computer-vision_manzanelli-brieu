@@ -3,6 +3,7 @@ import cv2
 from practice.homography_practice.homography_tool import HomographyTool
 from project_forms_detections.image_settings import ImageSettings
 from project_robotic_vision import vision_detector
+from project_robotic_vision.calibration import camera_calibration
 
 homographyTool = HomographyTool()
 web_cam_img_name = "WebCam"
@@ -18,6 +19,8 @@ def on_click(event, x, y, flags, param):
 if __name__ == '__main__':
 
     cap = cv2.VideoCapture(0)
+
+    camera_calibration.load_intrinsic_params('../project_robotic_vision/calibration/camera_intrinsic_params.json')
 
     cv2.namedWindow(web_cam_img_name)
     cv2.setMouseCallback(web_cam_img_name, on_click)
@@ -37,6 +40,7 @@ if __name__ == '__main__':
             break
 
         ret, cam_frame = cap.read()
+        cam_frame = camera_calibration.calibrate_image(cam_frame)
         cam_frame = cv2.flip(cam_frame, 1)
         show_img = cam_frame
 

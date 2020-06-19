@@ -8,8 +8,8 @@ camera_matrix = None
 distortion_coeff = None
 
 
-def load_intrinsic_params():
-    with open('camera_intrinsic_params.json') as json_file:
+def load_intrinsic_params(path):
+    with open(path) as json_file:
         data = json.load(json_file)
         global camera_matrix
         camera_matrix = np.array(data['camera_matrix'])
@@ -83,8 +83,10 @@ def __save_as_json__(cam_matrix, dist_coeff):
 
 def __capture_cam_frame__(dst_path: str, amount=50) -> list:
     print('--- START CAPTURE IMAGES ---')
+
     print('Press C continually for capturing images')
     cap = cv.VideoCapture(0)
+    window_name: str = 'Webcam'
     frameRate = cap.get(60)  # frame rate
     count: int = 0
     images_capture: list = []
@@ -93,6 +95,7 @@ def __capture_cam_frame__(dst_path: str, amount=50) -> list:
     while count <= amount:
         frameId = cap.get(1)  # current frame number
         ret, frame = cap.read()
+        cv.imshow(window_name, frame)
 
         if not ret:
             break
@@ -106,7 +109,9 @@ def __capture_cam_frame__(dst_path: str, amount=50) -> list:
             print('Saving image ' + str(count))
             capturing = count % 5 == 0
 
-    print('---CAPTURE IMAGE---')
+    print('---FINISHED CAPTURE IMAGE PROCESS---')
+    cv.destroyWindow(window_name)
+    cap.release()
     return images_capture
 
 
