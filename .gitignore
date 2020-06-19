@@ -1,3 +1,6 @@
+# Ignore image capture for robotic vision.
+caps
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
