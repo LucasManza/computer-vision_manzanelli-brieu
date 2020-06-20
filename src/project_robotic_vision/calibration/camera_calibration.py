@@ -16,7 +16,12 @@ __SQUARE_SIZE__ = 0.015
 __AMOUNT_OF_IMG__ = 20
 
 
-def load_intrinsic_params(path):
+def load_intrinsic_params(path: str):
+    """"Load camera intrinsic parameters which has been saved as JSON.
+   :param path: The path where the file was saved.
+   :type path: str
+
+    """
     with open(path) as json_file:
         data = json.load(json_file)
         global camera_matrix
@@ -29,20 +34,34 @@ def load_intrinsic_params(path):
         print(distortion_coeff)
 
 
-def calibrate_image(camera_img):
+def calibrate_image(image):
+    """"Calibrate image by using matrix_camera and distortion coefficients.
+
+    It's required to use load_intrinsic_params function first for calibration image.
+
+    :param image: The original image that you want to be calibrate. You use camera frame too.
+    :type image: OpenCV image
+
+    :return:The Calibrate image. If any error has been occurred, a message appears and the original image is return.
+
+    """
+    if camera_matrix is None or distortion_coeff is None:
+        print('YOU MUST LOAD PARAMETERS OR GENERATE THEM FIRST')
+        return image
+
     # Get camera image shape
-    h, w = camera_img.shape[:2]
+    h, w = image.shape[:2]
 
     # # Get fixed camera matrix and roi
     new_camera_matrix, roi = cv.getOptimalNewCameraMatrix(camera_matrix, distortion_coeff, (w, h), 1, (w, h))
 
     #  Fixed undistortion
-    dst = cv.undistort(camera_img, camera_matrix, distortion_coeff, None, new_camera_matrix)
+    dst = cv.undistort(image, camera_matrix, distortion_coeff, None, new_camera_matrix)
 
     return dst
 
 
-def __pre_calibrate_camera_process__(images, square_size: float, chessboard_size: (int, int) = (7, 6)):
+def __calculate_params_process__(images, square_size: float, chessboard_size: (int, int) = (7, 6)):
     print('--- Calibration in Proccess ---')
     # termination criteria
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -134,7 +153,7 @@ def __capture_images_process__(dst_path: str, amount=50) -> list:
     return images_capture
 
 
-def __load_images__(folder):
+def __load_capture_images__(folder):
     print('--- Loading images ---')
     images = []
     for filename in cv.os.listdir(folder):
@@ -160,7 +179,7 @@ def __write_line_instruction__(line, main_img, line_numb, spacing):
                lineType)
 
 
-def __show_calibrate_results__():
+def __show_calibration_results__():
     cap = cv.VideoCapture(0)
     load_intrinsic_params('camera_intrinsic_params.json')
     original_window_name: str = 'Webcam'
@@ -212,10 +231,10 @@ if __name__ == '__main__':
             __capture_images_process__('caps', __AMOUNT_OF_IMG__)
 
         elif cv.waitKey(0) == ord('c'):
-            images = __load_images__('caps')
-            __pre_calibrate_camera_process__(images, __SQUARE_SIZE__)
+            images = __load_capture_images__('caps')
+            __calculate_params_process__(images, __SQUARE_SIZE__)
 
         elif cv.waitKey(0) == ord('u'):
-            __show_calibrate_results__()
+            __show_calibration_results__()
 
     cv.destroyAllWindows()
