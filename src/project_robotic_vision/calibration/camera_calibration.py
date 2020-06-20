@@ -187,17 +187,17 @@ if __name__ == '__main__':
     cv.imshow('Camera Intrinsic Params', instruction_img)
 
     while True:
-        if cv.waitKey(1) == ord('q'):
+        if cv.waitKey(0) == ord('q'):
             break
 
-        elif cv.waitKey(1) == ord('s'):
+        elif cv.waitKey(0) == ord('s'):
             __capture_cam_frame__('caps', 20)
 
-        elif cv.waitKey(1) == ord('c'):
+        elif cv.waitKey(0) == ord('c'):
             images = __load_images_from_folder__('caps')
             __calibrate_camera__(images)
 
-        elif cv.waitKey(1) == ord('u'):
+        elif cv.waitKey(0) == ord('u'):
             __show_calibrate_results__()
 
     cv.destroyAllWindows()
