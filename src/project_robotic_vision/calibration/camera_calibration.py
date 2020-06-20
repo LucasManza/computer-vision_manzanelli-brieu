@@ -21,11 +21,11 @@ def load_intrinsic_params(path):
         data = json.load(json_file)
         global camera_matrix
         camera_matrix = np.array(data['camera_matrix'])
-        print('-- Camera Matrix --')
+        print('--- Camera Matrix ---')
         print(camera_matrix)
         global distortion_coeff
         distortion_coeff = np.array(data['distortion_coeff'])
-        print('-- Distortion Coeff --')
+        print('--- Distortion Coeff ---')
         print(distortion_coeff)
 
 
@@ -42,7 +42,7 @@ def calibrate_image(camera_img):
     return dst
 
 
-def __calibrate_camera__(images, square_size: float, chessboard_size: (int, int) = (7, 6)):
+def __pre_calibrate_camera_process__(images, square_size: float, chessboard_size: (int, int) = (7, 6)):
     print('--- Calibration in Proccess ---')
     # termination criteria
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -77,7 +77,7 @@ def __calibrate_camera__(images, square_size: float, chessboard_size: (int, int)
     print("-- Distortion Coeff. --")
     print(distortion_coeff)
 
-    __save_as_json__(camera_matrix, distortion_coeff)
+    __save_params__(camera_matrix, distortion_coeff)
 
     tot_error = 0
     for i in range(len(objpoints)):
@@ -90,7 +90,7 @@ def __calibrate_camera__(images, square_size: float, chessboard_size: (int, int)
     print("-- Calibration Finished! --")
 
 
-def __save_as_json__(cam_matrix, dist_coeff):
+def __save_params__(cam_matrix, dist_coeff):
     print("-- Writing JSON  --")
     cam_matrix = cam_matrix.tolist()
     dist_coeff = dist_coeff.tolist()
@@ -99,7 +99,7 @@ def __save_as_json__(cam_matrix, dist_coeff):
         json.dump(data, f)
 
 
-def __capture_cam_frame__(dst_path: str, amount=50) -> list:
+def __capture_images_process__(dst_path: str, amount=50) -> list:
     print('--- START CAPTURE IMAGES ---')
 
     print('Press C continually for   capturing images')
@@ -134,7 +134,7 @@ def __capture_cam_frame__(dst_path: str, amount=50) -> list:
     return images_capture
 
 
-def __load_images_from_folder__(folder):
+def __load_images__(folder):
     print('--- Loading images ---')
     images = []
     for filename in cv.os.listdir(folder):
@@ -209,11 +209,11 @@ if __name__ == '__main__':
             break
 
         elif cv.waitKey(0) == ord('s'):
-            __capture_cam_frame__('caps', __AMOUNT_OF_IMG__)
+            __capture_images_process__('caps', __AMOUNT_OF_IMG__)
 
         elif cv.waitKey(0) == ord('c'):
-            images = __load_images_from_folder__('caps')
-            __calibrate_camera__(images, __SQUARE_SIZE__)
+            images = __load_images__('caps')
+            __pre_calibrate_camera_process__(images, __SQUARE_SIZE__)
 
         elif cv.waitKey(0) == ord('u'):
             __show_calibrate_results__()
