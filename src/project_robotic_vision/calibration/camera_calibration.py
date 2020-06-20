@@ -141,6 +141,29 @@ def __write_line_instruction__(line, main_img, line_numb, spacing):
                lineType)
 
 
+def __show_calibrate_results__():
+    cap = cv.VideoCapture(0)
+    load_intrinsic_params('camera_intrinsic_params.json')
+    original_window_name: str = 'Webcam'
+    calibrate_window_name: str = 'Webcam'
+
+    while True:
+
+        if cv.waitKey(1) == ord('i'):
+            break
+
+        ret, frame = cap.read()
+        frame = cv.flip(frame, 1)
+        cv.imshow(original_window_name, frame)
+
+        calibrate_img = calibrate_image(frame)
+        cv.imshow(calibrate_window_name, calibrate_img)
+
+    cv.destroyWindow(original_window_name)
+    cv.destroyWindow(calibrate_window_name)
+    cap.release()
+
+
 if __name__ == '__main__':
     instruction_img = np.zeros((300, 700, 3), np.uint8)
 
@@ -167,5 +190,8 @@ if __name__ == '__main__':
         elif cv.waitKey(1) == ord('c'):
             images = __load_images_from_folder__('caps')
             __calibrate_camera__(images)
+
+        elif cv.waitKey(1) == ord('u'):
+            __show_calibrate_results__()
 
     cv.destroyAllWindows()
