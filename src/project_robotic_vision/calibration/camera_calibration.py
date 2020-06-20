@@ -27,15 +27,15 @@ def calibrate_image(camera_img):
 
     # # Get fixed camera matrix and roi
     new_camera_matrix, roi = cv.getOptimalNewCameraMatrix(camera_matrix, distortion_coeff, (w, h), 1, (w, h))
-    #
-    # # Fixed undistortion
+    
+    #  Fixed undistortion
     dst = cv.undistort(camera_img, camera_matrix, distortion_coeff, None, new_camera_matrix)
 
     return dst
 
 
 def __calibrate_camera__(images, chessboard_size: (int, int) = (6, 7)):
-    print('--- Calibration in Proccess--')
+    print('--- Calibration in Proccess ---')
     # termination criteria
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
     # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
@@ -69,6 +69,14 @@ def __calibrate_camera__(images, chessboard_size: (int, int) = (6, 7)):
 
     __save_as_json__(camera_matrix, distortion_coeff)
 
+    tot_error = 0
+    for i in range(len(objpoints)):
+        imgpoints2, _ = cv.projectPoints(objpoints[i], rvecs[i], tvecs[i], camera_matrix, distortion_coeff)
+        error = cv.norm(imgpoints[i], imgpoints2, cv.NORM_L2) / len(imgpoints2)
+        tot_error += error
+
+    print("* Total error ", tot_error / len(objpoints))
+
     print("-- Calibration Finished! --")
 
 
@@ -84,7 +92,7 @@ def __save_as_json__(cam_matrix, dist_coeff):
 def __capture_cam_frame__(dst_path: str, amount=50) -> list:
     print('--- START CAPTURE IMAGES ---')
 
-    print('Press C continually for capturing images')
+    print('Press C continually for   capturing images')
     cap = cv.VideoCapture(0)
     window_name: str = 'Webcam'
     frameRate = cap.get(60)  # frame rate
@@ -110,14 +118,14 @@ def __capture_cam_frame__(dst_path: str, amount=50) -> list:
             print('Saving image ' + str(count))
             capturing = count % 5 == 0
 
-    print('---FINISHED CAPTURE IMAGE PROCESS---')
+    print('--- FINISHED CAPTURE IMAGE PROCESS ---')
     cv.destroyWindow(window_name)
     cap.release()
     return images_capture
 
 
 def __load_images_from_folder__(folder):
-    print('--- Loading images--')
+    print('--- Loading images ---')
     images = []
     for filename in cv.os.listdir(folder):
         img = cv.imread(cv.os.path.join(folder, filename))
