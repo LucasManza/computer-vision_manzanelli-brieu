@@ -12,7 +12,7 @@ distortion_coeff = None
 # Chessboard square cell size in meters.  __SQUARE_SIZE__ = 1.5 cm
 __SQUARE_SIZE__ = 0.015
 
-# Chessboard square cell size in meters.  __SQUARE_SIZE__ = 1.5 cm
+# Amount of picture for capture process
 __AMOUNT_OF_IMG__ = 20
 
 
@@ -184,11 +184,11 @@ def __show_calibrate_results__():
 
 
 if __name__ == '__main__':
-    instruction_img = np.zeros((550, 800, 3), np.uint8)
+    instruction_img = np.zeros((550, 900, 3), np.uint8)
 
     lines: list = [
         'Steps:',
-        '1) Start by capture 20 Chessboard Images:',
+        '1) Start by capture ' + str(__AMOUNT_OF_IMG__) + ' Chessboard Images:',
         '  * First Press: \'s\', for initialized the process',
         '  * Then continually Press:\'c\' for capture each image',
         '  * Await for the terminal to notified you that the process has been finished',
@@ -209,7 +209,7 @@ if __name__ == '__main__':
             break
 
         elif cv.waitKey(0) == ord('s'):
-            __capture_cam_frame__('caps', 20)
+            __capture_cam_frame__('caps', __AMOUNT_OF_IMG__)
 
         elif cv.waitKey(0) == ord('c'):
             images = __load_images_from_folder__('caps')
