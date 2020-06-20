@@ -4,8 +4,16 @@ import cv2 as cv
 import numpy as np
 import yaml
 
+# Auxiliaries variables for calibrate camera function
 camera_matrix = None
 distortion_coeff = None
+
+# Internal Variables
+# Chessboard square cell size in meters.  __SQUARE_SIZE__ = 1.5 cm
+__SQUARE_SIZE__ = 0.015
+
+# Chessboard square cell size in meters.  __SQUARE_SIZE__ = 1.5 cm
+__AMOUNT_OF_IMG__ = 20
 
 
 def load_intrinsic_params(path):
@@ -27,20 +35,22 @@ def calibrate_image(camera_img):
 
     # # Get fixed camera matrix and roi
     new_camera_matrix, roi = cv.getOptimalNewCameraMatrix(camera_matrix, distortion_coeff, (w, h), 1, (w, h))
-    
+
     #  Fixed undistortion
     dst = cv.undistort(camera_img, camera_matrix, distortion_coeff, None, new_camera_matrix)
 
     return dst
 
 
-def __calibrate_camera__(images, chessboard_size: (int, int) = (6, 7)):
+def __calibrate_camera__(images, square_size: float, chessboard_size: (int, int) = (7, 6)):
     print('--- Calibration in Proccess ---')
     # termination criteria
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
     # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
     objp = np.zeros((chessboard_size[0] * chessboard_size[1], 3), np.float32)
-    objp[:, :2] = np.mgrid[0:7, 0:6].T.reshape(-1, 2)
+    objp[:, :2] = np.mgrid[0:chessboard_size[0], 0:chessboard_size[1]].T.reshape(-1, 2)
+    objp = objp * square_size
+
     # Arrays to store object points and image points from all the images.
     objpoints = []  # 3d point in real world space
     imgpoints = []  # 2d points in image plane.
@@ -55,7 +65,7 @@ def __calibrate_camera__(images, chessboard_size: (int, int) = (6, 7)):
             corners2 = cv.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
             imgpoints.append(corners)
             # Draw and display the corners
-            cv.drawChessboardCorners(img, (7, 6), corners2, ret)
+            cv.drawChessboardCorners(img, chessboard_size, corners2, ret)
             cv.imshow('Calibrate Window', img)
             cv.waitKey(500)
 
@@ -203,7 +213,7 @@ if __name__ == '__main__':
 
         elif cv.waitKey(0) == ord('c'):
             images = __load_images_from_folder__('caps')
-            __calibrate_camera__(images)
+            __calibrate_camera__(images, __SQUARE_SIZE__)
 
         elif cv.waitKey(0) == ord('u'):
             __show_calibrate_results__()
