@@ -56,7 +56,7 @@ def __calibrate_camera__(images, chessboard_size: (int, int) = (6, 7)):
             imgpoints.append(corners)
             # Draw and display the corners
             cv.drawChessboardCorners(img, (7, 6), corners2, ret)
-            cv.imshow('img', img)
+            cv.imshow('Calibrate Window', img)
             cv.waitKey(500)
 
     # Get camera calibration params
@@ -95,6 +95,7 @@ def __capture_cam_frame__(dst_path: str, amount=50) -> list:
     while count <= amount:
         frameId = cap.get(1)  # current frame number
         ret, frame = cap.read()
+        frame = cv.flip(frame, 1)
         cv.imshow(window_name, frame)
 
         if not ret:
@@ -145,7 +146,7 @@ def __show_calibrate_results__():
     cap = cv.VideoCapture(0)
     load_intrinsic_params('camera_intrinsic_params.json')
     original_window_name: str = 'Webcam'
-    calibrate_window_name: str = 'Webcam'
+    calibrate_window_name: str = 'Calibrate Window'
 
     while True:
 
@@ -165,14 +166,19 @@ def __show_calibrate_results__():
 
 
 if __name__ == '__main__':
-    instruction_img = np.zeros((300, 700, 3), np.uint8)
+    instruction_img = np.zeros((550, 800, 3), np.uint8)
 
     lines: list = [
-        'Camera Intrinsic Params',
-        '1A) For starting capture chessboard images: Press \'s\'',
-        '1B) Capture chessboard image by: Pressing \'c\'',
-        '2) For start calibrate camera by images captured: Press \'c\'',
-        '3) Exit: Press \'q\'',
+        'Steps:',
+        '1) Start by capture 20 Chessboard Images:',
+        '  * First Press: \'s\', for initialized the process',
+        '  * Then continually Press:\'c\' for capture each image',
+        '  * Await for the terminal to notified you that the process has been finished',
+        '2) Start calibration camera process by Pressing: \'c\'. Await for terminal response.',
+        '3) Show calibration results',
+        '  * Turn on video by Pressing: \'u\'',
+        '  * Turn off video by Press: \'i\'',
+        '4) Exit: Press \'q\'',
         'Note: Pay Attention to your terminal response.',
     ]
     for num, line in enumerate(lines, start=1):
@@ -185,7 +191,7 @@ if __name__ == '__main__':
             break
 
         elif cv.waitKey(1) == ord('s'):
-            __capture_cam_frame__('caps', 50)
+            __capture_cam_frame__('caps', 20)
 
         elif cv.waitKey(1) == ord('c'):
             images = __load_images_from_folder__('caps')
