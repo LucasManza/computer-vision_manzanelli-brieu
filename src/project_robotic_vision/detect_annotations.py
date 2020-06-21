@@ -42,12 +42,18 @@ def __text_annotation__(img, text: str, size: (int, int), color):
 
 def __parse_text_annotation__(center: (int, int), image, centimeters: int) -> str:
     unit: str = 'px'
+    h, w = image.shape[:2]
     x, y = center
+    x -= w / 2
+    y -= h / 2
     if centimeters is not None:
         unit = 'cm'
-        h, w = image.shape[:2]
-        x = int(center[0] / w * centimeters)
-        y = int(center[1] / h * centimeters)
+        x = (center[0] / w * centimeters - centimeters / 2)
+        y = (center[1] / h * centimeters - centimeters / 2)
+        x = round(x,2)
+        y = round(y,2)
+
+    y *= -1
     return '(' + str(x) + unit + ', ' + str(y) + unit + ')'
 
 
