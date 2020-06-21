@@ -53,7 +53,7 @@ if __name__ == '__main__':
                 show_binary_images)
 
             cv2.imshow('Homography', homo_img)
-            show_img = homographyTool.draw_points(cam_frame)
+            homographyTool.draw_system_ref(cam_frame)
 
         cv2.imshow(web_cam_img_name, show_img)
 

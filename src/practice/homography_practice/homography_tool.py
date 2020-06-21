@@ -23,24 +23,32 @@ def order_points(pts):
     return rect
 
 
+def points_to_rect_coords(top_left: (int, int), bottom_right: (int, int)):
+    top_right = (bottom_right[0], top_left[1])
+    bottom_left = (top_left[0], bottom_right[1])
+
+    rect_coords = top_left, top_right, bottom_right, bottom_left
+    center_x = ((bottom_right[0] - top_left[0]) / 2) + top_left[0]
+    center_y = ((bottom_right[1] - top_left[1]) / 2) + top_left[1]
+    center_coord = int(center_x), int(center_y)
+    return rect_coords, center_coord
+
+
 class HomographyTool:
 
     def __init__(self):
         self.__2DPoints__ = []
         self.__rect_coords__ = []
+        self.__center_coord__ = []
 
-    def __points_to_rect_coords__(self):
-        top_left_coord = self.__2DPoints__[0]
-        bottom_right_coord = self.__2DPoints__[1]
-        top_right_coord = (bottom_right_coord[0], top_left_coord[1])
-        bottom_left_coord = (top_left_coord[0], bottom_right_coord[1])
-
-        self.__rect_coords__ = top_left_coord, top_right_coord, bottom_right_coord, bottom_left_coord
-        
     def add_point(self, x, y):
         if len(self.__2DPoints__) == 1:
             self.__2DPoints__.append((x, y))
-            self.__points_to_rect_coords__()
+            self.__rect_coords__, self.__center_coord__ = \
+                points_to_rect_coords(
+                    top_left=self.__2DPoints__[0],
+                    bottom_right=self.__2DPoints__[1]
+                )
         else:
             self.__2DPoints__ = []
             self.__rect_coords__ = []
@@ -76,14 +84,23 @@ class HomographyTool:
         # compute the perspective transform matrix and then apply it
         M = cv2.getPerspectiveTransform(rect, dst)
         warped = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
+
+        h, w, c = warped.shape
+        rect, center = points_to_rect_coords((0, 0), (w, h))
+        self.draw_system_ref(warped, rect, center)
+
         # return the warped image
         return warped
 
-    def draw_points(self, camera_img):
-        image = camera_img
-        for point in self.__rect_coords__:
-            image = cv2.circle(camera_img, point, radius=0, color=(0, 0, 255), thickness=5)
-        return image
+    def draw_system_ref(self, image, rect: (int, int, int, int) = None, center_coord: (int, int) = None):
+        if rect is None or center_coord is None:
+            (tl, tr, br, bl) = self.__rect_coords__
+            center_coord = self.__center_coord__
+        else:
+            (tl, tr, br, bl) = rect
 
-        # for point in self.__2DPoints__:
-        #     camera_img[point[0], point[1]] = [0, 0, 255]
+        color = (0, 255, 0)
+        thickness = 2
+        cv2.rectangle(image, tl, center_coord, color, thickness)
+        cv2.rectangle(image, center_coord, br, color, thickness)
+        cv2.rectangle(image, tl, br, color, thickness)
