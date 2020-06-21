@@ -1,6 +1,6 @@
 import cv2
 
-from practice.homography_practice.homography_tool import HomographyTool
+from practice.homography_practice.homography_tool import HomographyTool, points_to_rect_coords
 from project_forms_detections.image_settings import ImageSettings
 from project_robotic_vision import vision_detector
 from project_robotic_vision.calibration import camera_calibration
@@ -15,6 +15,13 @@ def on_click(event, x, y, flags, param):
         homographyTool.add_point(x, y)
         print('x = %d, y = %d' % (x, y))
 
+
+def draw_syst_refs(cam_frame, homo_img):
+    h, w, c = homo_img.shape
+    rect, center = points_to_rect_coords((0, 0), (w, h))
+    homographyTool.draw_system_ref(homo_img, rect, center)
+
+    homographyTool.draw_system_ref(cam_frame)
 
 if __name__ == '__main__':
 
@@ -52,8 +59,8 @@ if __name__ == '__main__':
                 camera_invert_img,
                 show_binary_images)
 
+            draw_syst_refs(cam_frame, homo_img)
             cv2.imshow('Homography', homo_img)
-            homographyTool.draw_system_ref(cam_frame)
 
         cv2.imshow(web_cam_img_name, show_img)
 

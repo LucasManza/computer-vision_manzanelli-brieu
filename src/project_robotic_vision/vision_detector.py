@@ -18,15 +18,55 @@ def __select_img__(select_bin: bool, img, bin_img, contours):
         return __show_contours__(img, contours)
 
 
+def __text_annotation__(img, text, contour, color):
+    x, y, w, h = cv2.boundingRect(contour)
+
+    font_scale = 0.5
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    # get the width and height of the text box
+    (text_width, text_height) = cv2.getTextSize(text, font, fontScale=font_scale, thickness=1)[0]
+    # set the text start position
+    text_offset_x = x
+    text_offset_y = y - 10
+    # make the coords of the box with a small padding of two pixels
+    box_coords = ((text_offset_x, text_offset_y), (text_offset_x + text_width + 2, text_offset_y - text_height - 2))
+    cv2.rectangle(img, box_coords[0], box_coords[1], color, cv2.FILLED)
+    cv2.putText(img, text, (x, y - 10), font, fontScale=font_scale, color=(255, 255, 255), thickness=1)
+
+
+def __draw_annotations__(img, contours, color):
+    """"
+    Apply a rectangle detection by contours, instead of drawing the contour per se.
+    """
+    copy_img = img.copy()
+    for cont in contours:
+        # Get center
+        center = contours_operators.contour_center(cont)
+        # Draw center
+        cv2.circle(copy_img, center, color=color, radius=0, thickness=5)
+        # Draw rectangle container with text
+        contours_operators.draw_contour_rect(copy_img, cont, color)
+        __text_annotation__(copy_img, str(center), cont, color)
+
+    return copy_img
+
+
 def __show_shapes_detection__(camera_frame, contours_result):
     img_detection = camera_frame
     if contours_result.__len__() > 0:
-        img_detection = contours_operators \
-            .draw_contours_rect(camera_frame, contours_result, green_colour)
+        img_detection = __draw_annotations__(camera_frame, contours_result, green_colour)
     return img_detection
 
-def detect_shape(camera_image, img_target, camera_settings, target_settings, target_invert_img, camera_invert_img,
-                 show_binary_images):
+
+def detect_shape(
+        camera_image,
+        img_target,
+        camera_settings,
+        target_settings,
+        target_invert_img,
+        camera_invert_img,
+        show_binary_images,
+):
     target_binary_image = threshold_operators \
         .generate_binary_image(img_target, target_settings.threshold, target_invert_img)
 

@@ -38,6 +38,12 @@ def draw_contour_rect(img, contour, colour):
     cv2.rectangle(img, (x, y), (x + w, y + h), colour, 2)
 
 
+def contour_center(contour) -> (int, int):
+    moments = cv2.moments(contour)
+    cx = int(moments['m10'] / moments['m00'])
+    cy = int(moments['m01'] / moments['m00'])
+    return cx, cy
+
 def compare_contours(contour, target_contour):
     return cv2.matchShapes(contour, target_contour, cv2.CONTOURS_MATCH_I3, 0)
 
@@ -47,7 +53,7 @@ def filter_by_distance(contours, target_contour, match_error: float):
     Filter a list of contours by comparing distance with the target's contours.
 
     """
-    if target_contour is None : return []
+    if target_contour is None: return []
 
     return list(filter(lambda x: compare_contours(x, target_contour) <= match_error, contours))
 

@@ -85,9 +85,8 @@ class HomographyTool:
         M = cv2.getPerspectiveTransform(rect, dst)
         warped = cv2.warpPerspective(image, M, (maxWidth, maxHeight))
 
-        h, w, c = warped.shape
-        rect, center = points_to_rect_coords((0, 0), (w, h))
-        self.draw_system_ref(warped, rect, center)
+
+
 
         # return the warped image
         return warped
