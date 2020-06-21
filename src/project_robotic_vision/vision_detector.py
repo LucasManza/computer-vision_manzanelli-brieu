@@ -18,20 +18,26 @@ def __select_img__(select_bin: bool, img, bin_img, contours):
         return __show_contours__(img, contours)
 
 
-def __text_annotation__(img, text, contour, color):
-    x, y, w, h = cv2.boundingRect(contour)
+def __text_annotation__(img, text: str, size: (int, int), color):
+    x, y = size
 
     font_scale = 0.5
     font = cv2.FONT_HERSHEY_SIMPLEX
     # get the width and height of the text box
     (text_width, text_height) = cv2.getTextSize(text, font, fontScale=font_scale, thickness=1)[0]
     # set the text start position
-    text_offset_x = x
     text_offset_y = y - 10
     # make the coords of the box with a small padding of two pixels
-    box_coords = ((text_offset_x, text_offset_y), (text_offset_x + text_width + 2, text_offset_y - text_height - 2))
+    box_coords = ((x, text_offset_y), (x + text_width + 2, text_offset_y - text_height - 2))
     cv2.rectangle(img, box_coords[0], box_coords[1], color, cv2.FILLED)
-    cv2.putText(img, text, (x, y - 10), font, fontScale=font_scale, color=(255, 255, 255), thickness=1)
+    cv2.putText(img, text, (x, text_offset_y), font, fontScale=font_scale, color=(255, 255, 255), thickness=1)
+
+
+def __apply_homo_matrix__(homo_matrix, matrix2D):
+    matrix3D = matrix2D[0], matrix2D[1], 1
+    # Apply homo. matrix transformation over center
+    matrix3D = homo_matrix.dot(matrix3D)
+    return int(matrix3D[0]), int(matrix3D[1])
 
 
 def __draw_annotations__(img, contours, color, transf_matrix=None):
@@ -40,18 +46,22 @@ def __draw_annotations__(img, contours, color, transf_matrix=None):
     """
     copy_img = img.copy()
     for cont in contours:
+        # Contours rect
+        x, y, w, h = cv2.boundingRect(cont)
         # Get center
         center = contours_operators.contour_center(cont)
+
+        # Apply Transformation
         if transf_matrix is not None:
-            center3D = center[0], center[1], 1
-            center3D = transf_matrix.dot(center3D)
-            center = int(center3D[0]), int(center3D[1])
+            center = __apply_homo_matrix__(transf_matrix, center)
+            # h, w = __apply_homo_matrix__(transf_matrix, (h, w))
+            x, y = __apply_homo_matrix__(transf_matrix, (x, y))
 
         # Draw center
         cv2.circle(copy_img, center, color=color, radius=0, thickness=5)
         # Draw rectangle container with text
-        # contours_operators.draw_contour_rect(copy_img, cont, color)
-        __text_annotation__(copy_img, str(center), cont, color)
+        cv2.rectangle(copy_img, (x, y), (x + w, y + h), (36, 255, 12), 1)
+        __text_annotation__(copy_img, str(center), (x, y), color)
 
     return copy_img
 
