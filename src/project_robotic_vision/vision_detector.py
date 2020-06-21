@@ -58,7 +58,29 @@ def __show_shapes_detection__(camera_frame, contours_result):
     return img_detection
 
 
-def detect_shape(
+def __points_to_rect_coords__(top_left: (int, int), bottom_right: (int, int)):
+    top_right = (bottom_right[0], top_left[1])
+    bottom_left = (top_left[0], bottom_right[1])
+
+    rect_coords = top_left, top_right, bottom_right, bottom_left
+    center_x = ((bottom_right[0] - top_left[0]) / 2) + top_left[0]
+    center_y = ((bottom_right[1] - top_left[1]) / 2) + top_left[1]
+    center_coord = int(center_x), int(center_y)
+    return rect_coords, center_coord
+
+
+def __draw_system_ref__(image, color):
+    h, w, c = image.shape
+    rect, center = __points_to_rect_coords__((0, 0), (w, h))
+    (tl, tr, br, bl) = rect
+
+    thickness = 2
+    cv2.rectangle(image, tl, center, color, thickness)
+    cv2.rectangle(image, center, br, color, thickness)
+    cv2.rectangle(image, tl, br, color, thickness)
+
+
+def detector_target(
         camera_image,
         img_target,
         camera_settings,
@@ -102,4 +124,7 @@ def detect_shape(
     contours_result = contours_operators.filter_by_area(contours_result, 100, 10000)
 
     # It's show a new window all possible results
-    return __show_shapes_detection__(camera_image, contours_result)
+    camera_image = __show_shapes_detection__(camera_image, contours_result)
+    __draw_system_ref__(camera_image, (255, 0, 0))
+
+    return camera_image

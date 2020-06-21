@@ -90,16 +90,3 @@ class HomographyTool:
 
         # return the warped image
         return warped
-
-    def draw_system_ref(self, image, rect: (int, int, int, int) = None, center_coord: (int, int) = None):
-        if rect is None or center_coord is None:
-            (tl, tr, br, bl) = self.__rect_coords__
-            center_coord = self.__center_coord__
-        else:
-            (tl, tr, br, bl) = rect
-
-        color = (0, 255, 0)
-        thickness = 2
-        cv2.rectangle(image, tl, center_coord, color, thickness)
-        cv2.rectangle(image, center_coord, br, color, thickness)
-        cv2.rectangle(image, tl, br, color, thickness)

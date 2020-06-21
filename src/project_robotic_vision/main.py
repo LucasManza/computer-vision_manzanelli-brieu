@@ -16,13 +16,6 @@ def on_click(event, x, y, flags, param):
         print('x = %d, y = %d' % (x, y))
 
 
-def draw_syst_refs(cam_frame, homo_img):
-    h, w, c = homo_img.shape
-    rect, center = points_to_rect_coords((0, 0), (w, h))
-    homographyTool.draw_system_ref(homo_img, rect, center)
-
-    homographyTool.draw_system_ref(cam_frame)
-
 if __name__ == '__main__':
 
     cap = cv2.VideoCapture(0)
@@ -49,19 +42,19 @@ if __name__ == '__main__':
         ret, cam_frame = cap.read()
         cam_frame = camera_calibration.calibrate_image(cam_frame)
         cam_frame = cv2.flip(cam_frame, 1)
-        show_img = cam_frame
 
         if homographyTool.__2DPoints__.__len__() == 2:
             homo_img = homographyTool.rect_homography(cam_frame)
-            homo_img = vision_detector.detect_shape(
-                homo_img, img_target, camera_settings, target_settings,
+
+            homo_img = vision_detector.detector_target(
+                homo_img,
+                img_target, camera_settings, target_settings,
                 target_invert_img,
                 camera_invert_img,
                 show_binary_images)
 
-            draw_syst_refs(cam_frame, homo_img)
             cv2.imshow('Homography', homo_img)
 
-        cv2.imshow(web_cam_img_name, show_img)
+        cv2.imshow(web_cam_img_name, cam_frame)
 
 cv2.destroyAllWindows()
