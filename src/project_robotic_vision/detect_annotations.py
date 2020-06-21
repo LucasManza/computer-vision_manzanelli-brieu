@@ -64,7 +64,7 @@ def __apply_homo_matrix__(homo_matrix, matrix2D):
     return int(matrix3D[0]), int(matrix3D[1])
 
 
-def draw_annotations(img, contours, color, transf_matrix=None, centimeters: int = None):
+def draw_annotations(img, contours, color, homo_matrix=None, centimeters: int = None):
     """"
     Apply a rectangle detection by contours, instead of drawing the contour per se.
     """
@@ -76,9 +76,9 @@ def draw_annotations(img, contours, color, transf_matrix=None, centimeters: int 
         center = contours_operators.contour_center(cont)
 
         # Apply Transformation
-        if transf_matrix is not None:
-            center = __apply_homo_matrix__(transf_matrix, center)
-            x, y = __apply_homo_matrix__(transf_matrix, (x, y))
+        if homo_matrix is not None:
+            center = __apply_homo_matrix__(homo_matrix, center)
+            x, y = __apply_homo_matrix__(homo_matrix, (x, y))
 
         # Draw center
         cv2.circle(copy_img, center, color=color, radius=0, thickness=5)
