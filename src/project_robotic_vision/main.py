@@ -44,10 +44,12 @@ if __name__ == '__main__':
         cam_frame = cv2.flip(cam_frame, 1)
 
         if homographyTool.__2DPoints__.__len__() == 2:
-            homo_img = homographyTool.rect_homography(cam_frame)
+            homo_img, homo_matrix = homographyTool.rect_homography(cam_frame)
 
-            homo_img = vision_detector.detector_target(
+            cam_frame, homo_img = vision_detector.detector_target(
+                cam_frame,
                 homo_img,
+                homo_matrix,
                 img_target, camera_settings, target_settings,
                 target_invert_img,
                 camera_invert_img,

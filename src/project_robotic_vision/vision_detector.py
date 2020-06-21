@@ -34,7 +34,7 @@ def __text_annotation__(img, text, contour, color):
     cv2.putText(img, text, (x, y - 10), font, fontScale=font_scale, color=(255, 255, 255), thickness=1)
 
 
-def __draw_annotations__(img, contours, color):
+def __draw_annotations__(img, contours, color, transf_matrix=None):
     """"
     Apply a rectangle detection by contours, instead of drawing the contour per se.
     """
@@ -42,19 +42,24 @@ def __draw_annotations__(img, contours, color):
     for cont in contours:
         # Get center
         center = contours_operators.contour_center(cont)
+        if transf_matrix is not None:
+            center3D = center[0], center[1], 1
+            center3D = transf_matrix.dot(center3D)
+            center = int(center3D[0]), int(center3D[1])
+
         # Draw center
         cv2.circle(copy_img, center, color=color, radius=0, thickness=5)
         # Draw rectangle container with text
-        contours_operators.draw_contour_rect(copy_img, cont, color)
+        # contours_operators.draw_contour_rect(copy_img, cont, color)
         __text_annotation__(copy_img, str(center), cont, color)
 
     return copy_img
 
 
-def __show_shapes_detection__(camera_frame, contours_result):
+def __show_shapes_detection__(camera_frame, contours_result, transf_matrix):
     img_detection = camera_frame
     if contours_result.__len__() > 0:
-        img_detection = __draw_annotations__(camera_frame, contours_result, green_colour)
+        img_detection = __draw_annotations__(camera_frame, contours_result, green_colour, transf_matrix)
     return img_detection
 
 
@@ -82,6 +87,8 @@ def __draw_system_ref__(image, color):
 
 def detector_target(
         camera_image,
+        homo_image,
+        homo_matrix,
         img_target,
         camera_settings,
         target_settings,
@@ -124,7 +131,8 @@ def detector_target(
     contours_result = contours_operators.filter_by_area(contours_result, 100, 10000)
 
     # It's show a new window all possible results
-    camera_image = __show_shapes_detection__(camera_image, contours_result)
+    camera_image = __show_shapes_detection__(camera_image, contours_result, None)
+    homo_image = __show_shapes_detection__(homo_image, contours_result, homo_matrix)
     __draw_system_ref__(camera_image, (255, 0, 0))
 
-    return camera_image
+    return camera_image, homo_image
