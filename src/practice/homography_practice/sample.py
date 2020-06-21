@@ -30,7 +30,7 @@ if __name__ == '__main__':
         frame = cv2.flip(frame, 1)
 
         if homographyTool.__2DPoints__.__len__() == 4:
-            cv2.imshow('Homography', homographyTool.four_point_transform(frame))
+            cv2.imshow('Homography', homographyTool.rect_homography(frame))
         cv2.imshow('WebCam', frame)
 
 cv2.destroyAllWindows()

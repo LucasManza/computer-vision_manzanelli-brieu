@@ -27,23 +27,29 @@ class HomographyTool:
 
     def __init__(self):
         self.__2DPoints__ = []
+        self.__rect_coords__ = []
 
-    def add_point(self, x, y):
-        if len(self.__2DPoints__) >= 2:
-            self.__2DPoints__ = []
-        self.__2DPoints__.append((x, y))
-
-    def four_point_transform(self, image):
+    def __points_to_rect_coords__(self):
         top_left_coord = self.__2DPoints__[0]
         bottom_right_coord = self.__2DPoints__[1]
         top_right_coord = (bottom_right_coord[0], top_left_coord[1])
         bottom_left_coord = (top_left_coord[0], bottom_right_coord[1])
 
-        coords = [top_left_coord, top_right_coord, bottom_right_coord, bottom_left_coord]
+        self.__rect_coords__ = top_left_coord, top_right_coord, bottom_right_coord, bottom_left_coord
+        
+    def add_point(self, x, y):
+        if len(self.__2DPoints__) == 1:
+            self.__2DPoints__.append((x, y))
+            self.__points_to_rect_coords__()
+        else:
+            self.__2DPoints__ = []
+            self.__rect_coords__ = []
+            self.__2DPoints__.append((x, y))
 
+    def rect_homography(self, image):
         # obtain a consistent order of the points and unpack them
         # individually
-        rect = order_points(np.array(coords))
+        rect = order_points(np.array(self.__rect_coords__))
         (tl, tr, br, bl) = rect
         # compute the width of the new image, which will be the
         # maximum distance between bottom-right and bottom-left
@@ -75,7 +81,7 @@ class HomographyTool:
 
     def draw_points(self, camera_img):
         image = camera_img
-        for point in self.__2DPoints__:
+        for point in self.__rect_coords__:
             image = cv2.circle(camera_img, point, radius=0, color=(0, 0, 255), thickness=5)
         return image
 
