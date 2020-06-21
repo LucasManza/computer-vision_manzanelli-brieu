@@ -15,6 +15,10 @@ __SQUARE_SIZE__ = 0.015
 # Amount of picture for capture process
 __AMOUNT_OF_IMG__ = 20
 
+SUCCESS = '\033[92m'
+WARNING = '\033[93m'
+FAIL = '\033[91m'
+ENDC = '\033[0m'
 
 def load_intrinsic_params(path: str):
     """"Load camera intrinsic parameters which has been saved as JSON.
@@ -61,6 +65,15 @@ def calibrate_image(image):
     return dst
 
 
+def __print_error__(error):
+    if error < 0.02:
+        print(SUCCESS + "Total error: "+str(error)+ENDC)
+    elif 0.02 <= error < 0.03:
+        print(WARNING + "Total error: "+str(error)+ENDC)
+    else:
+        print(FAIL + "Total error: "+str(error)+ENDC)
+
+
 def __calculate_params_process__(images, square_size: float, chessboard_size: (int, int) = (7, 6)):
     print('--- Calibration in Proccess ---')
     # termination criteria
@@ -104,7 +117,7 @@ def __calculate_params_process__(images, square_size: float, chessboard_size: (i
         error = cv.norm(imgpoints[i], imgpoints2, cv.NORM_L2) / len(imgpoints2)
         tot_error += error
 
-    print("* Total error ", tot_error / len(objpoints))
+    __print_error__(tot_error / len(objpoints))
 
     print("-- Calibration Finished! --")
 
