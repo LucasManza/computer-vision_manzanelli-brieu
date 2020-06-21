@@ -37,7 +37,7 @@ def __text_annotation__(img, text: str, size: (int, int), color):
     # make the coords of the box with a small padding of two pixels
     box_coords = ((x, text_offset_y), (x + text_width + 2, text_offset_y - text_height - 2))
     cv2.rectangle(img, box_coords[0], box_coords[1], color, cv2.FILLED)
-    cv2.putText(img, text, (x, text_offset_y), font, fontScale=font_scale, color=(255, 255, 255), thickness=1)
+    cv2.putText(img, text, (x, text_offset_y), font, fontScale=font_scale, color=(0, 0, 0), thickness=1)
 
 
 def __parse_text_annotation__(center: (int, int), image, centimeters: int) -> str:
