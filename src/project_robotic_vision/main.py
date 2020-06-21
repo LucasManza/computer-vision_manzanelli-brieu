@@ -44,9 +44,8 @@ if __name__ == '__main__':
         cam_frame = cv2.flip(cam_frame, 1)
         show_img = cam_frame
 
-        if homographyTool.__2DPoints__.__len__() == 4:
+        if homographyTool.__2DPoints__.__len__() == 2:
             homo_img = homographyTool.four_point_transform(cam_frame)
-            # todo missing fixing camera calibration
             homo_img = vision_detector.detect_shape(
                 homo_img, img_target, camera_settings, target_settings,
                 target_invert_img,

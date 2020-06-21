@@ -29,14 +29,21 @@ class HomographyTool:
         self.__2DPoints__ = []
 
     def add_point(self, x, y):
-        if len(self.__2DPoints__) >= 4:
+        if len(self.__2DPoints__) >= 2:
             self.__2DPoints__ = []
         self.__2DPoints__.append((x, y))
 
     def four_point_transform(self, image):
+        top_left_coord = self.__2DPoints__[0]
+        bottom_right_coord = self.__2DPoints__[1]
+        top_right_coord = (bottom_right_coord[0], top_left_coord[1])
+        bottom_left_coord = (top_left_coord[0], bottom_right_coord[1])
+
+        coords = [top_left_coord, top_right_coord, bottom_right_coord, bottom_left_coord]
+
         # obtain a consistent order of the points and unpack them
         # individually
-        rect = order_points(np.array(self.__2DPoints__))
+        rect = order_points(np.array(coords))
         (tl, tr, br, bl) = rect
         # compute the width of the new image, which will be the
         # maximum distance between bottom-right and bottom-left
