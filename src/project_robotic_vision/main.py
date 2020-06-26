@@ -50,7 +50,7 @@ if __name__ == '__main__':
         cam_frame = camera_calibration.calibrate_image(cam_frame)
         cam_frame = cv2.flip(cam_frame, 1)
 
-        if homographyTool.__2DPoints__.__len__() == 2:
+        if homographyTool.__2DPoints__.__len__() == 4:
             homo_img, homo_matrix = homographyTool.rect_homography(cam_frame)
 
             cam_frame, homo_img = detector.detector_target(

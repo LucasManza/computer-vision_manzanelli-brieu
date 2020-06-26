@@ -23,9 +23,10 @@ def order_points(pts):
     return rect
 
 
-def points_to_rect_coords(top_left: (int, int), bottom_right: (int, int)):
-    top_right = (bottom_right[0], top_left[1])
-    bottom_left = (top_left[0], bottom_right[1])
+def points_to_rect_coords(top_left: (int, int), top_right: (int, int), bottom_right: (int, int),
+                          bottom_left: (int, int)):
+    # top_right = (bottom_right[0], top_left[1])
+    # bottom_left = (top_left[0], bottom_right[1])
 
     rect_coords = top_left, top_right, bottom_right, bottom_left
     center_x = ((bottom_right[0] - top_left[0]) / 2) + top_left[0]
@@ -42,17 +43,23 @@ class HomographyTool:
         self.__center_coord__ = []
 
     def add_point(self, x, y):
-        if len(self.__2DPoints__) == 1:
-            self.__2DPoints__.append((x, y))
-            self.__rect_coords__, self.__center_coord__ = \
-                points_to_rect_coords(
-                    top_left=self.__2DPoints__[0],
-                    bottom_right=self.__2DPoints__[1]
-                )
-        else:
+        if len(self.__2DPoints__) == 4:
             self.__2DPoints__ = []
             self.__rect_coords__ = []
             self.__2DPoints__.append((x, y))
+            print(len(self.__2DPoints__))
+        else:
+            self.__2DPoints__.append((x, y))
+            print(len(self.__2DPoints__))
+
+            if len(self.__2DPoints__) == 4:
+                self.__rect_coords__, self.__center_coord__ = \
+                    points_to_rect_coords(
+                        top_left=self.__2DPoints__[0],
+                        top_right=self.__2DPoints__[1],
+                        bottom_right=self.__2DPoints__[2],
+                        bottom_left=self.__2DPoints__[3],
+                    )
 
     def rect_homography(self, image):
         # obtain a consistent order of the points and unpack them
