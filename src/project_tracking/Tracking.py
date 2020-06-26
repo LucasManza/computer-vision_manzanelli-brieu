@@ -7,13 +7,26 @@ prev=video.read()[1]
 tracked=None
 count=1
 
+#Adjustable parameters
+bin_thresh=60
+opening_radius=2
+closing_radius=11
+dilating_radius=12
+area_filter=900
+truck_lower_bound=4000
+car_upper_bound=2500
+green=(0,255,0)
+yellow=(0,255,255)
+red=(0,0,255)
+thickness=2
+
 
 def movement(image1,image2):#Gives back a binary image of what moved between two frames
     gray1=cv.cvtColor(image1, cv.COLOR_BGR2GRAY)
     gray2=cv.cvtColor(image2, cv.COLOR_BGR2GRAY)
     
     diff=cv.absdiff(gray1, gray2)
-    _,tresh=cv.threshold(diff, 60, 255, cv.THRESH_BINARY)
+    _,tresh=cv.threshold(diff, bin_thresh, 255, cv.THRESH_BINARY)
     return(tresh)
 
 def denoise(frame, method, radius1, radius2):#Clear noise on an image
@@ -66,19 +79,43 @@ def add_or_update(contours,tracked, image):
         tracked[i]["index"]=i
     return(tracked)
 
+def draw_results(L, image):
+    for o in L:
+        (x,y,w,h)=o.get("bbox")
+        x=int(x)
+        y=int(y)
+        w=int(w)
+        h=int(h)
+        area=w*h
+        
+        if area <= car_upper_bound:
+            image=cv.rectangle(image, (x,y), (x+w,y+h), green,thickness)
+            image=cv.putText(image, "auto", (x,y), cv.FONT_HERSHEY_PLAIN, 1, green, thickness)
+        
+        elif area >= truck_lower_bound:
+            image=cv.rectangle(image, (x,y), (x+w,y+h), red,thickness)
+            image=cv.putText(image, "camion", (x,y), cv.FONT_HERSHEY_PLAIN, 1, red, thickness)
+        
+        else:
+            image=cv.rectangle(image, (x,y), (x+w,y+h), yellow,thickness)
+            image=cv.putText(image, "camioneta", (x,y), cv.FONT_HERSHEY_PLAIN, 1, yellow, thickness)
+    return(image)
+
 
 while True:
     frame=video.read()[1]
+
     print("Loop n°")
     print(count)
     
     if frame is None:#Test if we reached the end of the video
             break
     
+    saved_frame=frame.copy()
     img_mov=movement(prev,frame)
-    noisefree_img=denoise(img_mov,cv.MORPH_RECT, 2, 11)
+    noisefree_img=denoise(img_mov,cv.MORPH_RECT, opening_radius, closing_radius)
     
-    k=cv.getStructuringElement(cv.MORPH_RECT, (12,12))
+    k=cv.getStructuringElement(cv.MORPH_RECT, (dilating_radius,dilating_radius))
     binary=cv.dilate(noisefree_img, k)#results amplification
     cv.imshow("binary",binary)
     
@@ -86,7 +123,7 @@ while True:
     filtered_contours=[]
     index=1
     for c in contours:#Filter smaller contours to avoid false positives
-        if cv.contourArea(c)>900:
+        if cv.contourArea(c)>area_filter:
             a={"index": index, "bbox": cv.boundingRect(c), "tracker": None, "updated": True}
             filtered_contours.append(a)
             index+=1
@@ -107,12 +144,13 @@ while True:
     print("Tracked objects")
     print(len(tracked))
         
-    #Missing a function to draw results on frame
+    frame=draw_results(tracked, frame)
     cv.imshow("contours",frame)
+    cv.imshow("original",saved_frame)
     
     for t in tracked:
         t["updated"]=False
-    prev=frame
+    prev=saved_frame
     count+=1
     key = cv.waitKey(30)
     if key == ord('q') or key == 27:#Quit
