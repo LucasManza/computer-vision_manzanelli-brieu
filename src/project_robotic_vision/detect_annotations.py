@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 from project_forms_detections.image_operators import contours_operators
 
@@ -50,8 +51,8 @@ def __parse_text_annotation__(center: (int, int), image, centimeters: int) -> st
         unit = 'cm'
         x = (center[0] / w * centimeters - centimeters / 2)
         y = (center[1] / h * centimeters - centimeters / 2)
-        x = round(x,2)
-        y = round(y,2)
+        x = round(x, 2)
+        y = round(y, 2)
 
     y *= -1
     return '(' + str(x) + unit + ', ' + str(y) + unit + ')'
@@ -61,6 +62,7 @@ def __apply_homo_matrix__(homo_matrix, matrix2D):
     matrix3D = matrix2D[0], matrix2D[1], 1
     # Apply homo. matrix transformation over center
     matrix3D = homo_matrix.dot(matrix3D)
+    matrix3D = matrix3D[0] / matrix3D[2], matrix3D[1] / matrix3D[2], 1
     return int(matrix3D[0]), int(matrix3D[1])
 
 
@@ -79,6 +81,8 @@ def draw_annotations(img, contours, color, homo_matrix=None, centimeters: int = 
         if homo_matrix is not None:
             center = __apply_homo_matrix__(homo_matrix, center)
             x, y = __apply_homo_matrix__(homo_matrix, (x, y))
+
+        print('CENTER', center)
 
         # Draw center
         cv2.circle(copy_img, center, color=color, radius=0, thickness=5)
