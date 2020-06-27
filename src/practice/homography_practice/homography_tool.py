@@ -88,9 +88,11 @@ class HomographyTool:
             [maxWidth - 1, 0],
             [maxWidth - 1, maxHeight - 1],
             [0, maxHeight - 1]], dtype="float32")
+
         # compute the perspective transform matrix and then apply it
         transform_matrix = cv2.getPerspectiveTransform(rect, dst)
         warped = cv2.warpPerspective(image, transform_matrix, (maxWidth, maxHeight))
+
         # return the warped image
         return warped, transform_matrix
 
