@@ -76,6 +76,6 @@ def detector_target(
     camera_image = __show_shapes_detection__(camera_image, contours_result, transf_matrix=None, centimeters=None)
     homo_image = __show_shapes_detection__(homo_image, contours_result, transf_matrix=homo_matrix, centimeters=homo_img_cms)
     draw_system_ref(camera_image, (255, 0, 0))
-    draw_system_ref(homo_image, (255, 0, 0))
+    draw_system_ref(homo_image, (0, 0, 255))
 
     return camera_image, homo_image

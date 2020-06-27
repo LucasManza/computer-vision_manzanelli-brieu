@@ -30,7 +30,7 @@ if __name__ == '__main__':
     cv2.namedWindow(webcam_window_name)
     cv2.setMouseCallback(webcam_window_name, on_click)
 
-    img_target = cv2.imread('../../src/assets/circle-img.png')
+    img_target = cv2.imread('../../src/assets/Capture.PNG')
 
     camera_settings = ImageSettings('Camera Analyzer Window', morph_struct_size=4)
     target_settings = ImageSettings('Target Analyzer Window')
@@ -64,8 +64,8 @@ if __name__ == '__main__':
                 show_binary_images)
 
             homo_size_cm = cv2.getTrackbarPos("cm/px", webcam_window_name)
-
             cv2.imshow('Homography', homo_img)
+            homographyTool.draw_points(cam_frame)
 
         cv2.imshow(webcam_window_name, cam_frame)
 
