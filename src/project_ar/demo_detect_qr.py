@@ -66,4 +66,6 @@ if __name__ == '__main__':
             __draw_coord__(cam_frame, bottom_left, GREEN_COLOR)
             __draw_coord__(cam_frame, top_left, BLUE_COLOR)
 
+
+
         cv2.imshow('Webcam', cam_frame)
