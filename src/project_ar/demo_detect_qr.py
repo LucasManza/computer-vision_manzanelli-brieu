@@ -150,6 +150,13 @@ def projection_matrix(camera_parameters, homography):
     return np.dot(camera_parameters, projection)
 
 
+def draw(img, corners, imgpts):
+    corner = tuple(corners[0].ravel())
+    img = cv2.line(img, corner, tuple(imgpts[0].ravel()), (255,0,0), 5)
+    img = cv2.line(img, corner, tuple(imgpts[1].ravel()), (0,255,0), 5)
+    img = cv2.line(img, corner, tuple(imgpts[2].ravel()), (0,0,255), 5)
+    return img
+
 if __name__ == '__main__':
     cap = cv2.VideoCapture(0)
     main_window_name: str = 'Webcam'
@@ -178,7 +185,7 @@ if __name__ == '__main__':
 
     qrDecoder = cv2.QRCodeDetector()
 
-    obj = OBJ("../../src/assets/99-intergalactic_spaceship-obj/Intergalactic_Spaceship-(Wavefront).obj", swapyz=True)
+    # obj = OBJ("../../src/assets/99-intergalactic_spaceship-obj/Intergalactic_Spaceship-(Wavefront).obj", swapyz=True)
 
     while True:
         if cv2.waitKey(1) == ord('q'):
@@ -213,6 +220,7 @@ if __name__ == '__main__':
             projection = projection_matrix(camera_parameters, h_matrix)
             # project cube or model
 
-            cam_frame = render(cam_frame, obj, projection, 300, 200)
+            # cam_frame = render(cam_frame, obj, projection, 300, 200)
+            # cam_frame = draw(cam_frame, (top_left, top_right, bottom_right, bottom_left))
 
         cv2.imshow('Webcam', cam_frame)
