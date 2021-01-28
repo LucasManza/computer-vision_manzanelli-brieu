@@ -30,7 +30,7 @@ def hex_to_rgb(hex_color):
     return tuple(int(hex_color[i:i + h_len // 3], 16) for i in range(0, h_len, h_len // 3))
 
 
-def render(img, obj, projection, target_height, target_width, color=False):
+def render(img, obj, projection, target_height, target_width, color=False, obj_scale=1):
     """
     Render a loaded obj model into the current video frame
     """
@@ -42,6 +42,7 @@ def render(img, obj, projection, target_height, target_width, color=False):
         face_vertices = face[0]
         points = np.array([vertices[vertex - 1] for vertex in face_vertices])
         points = np.dot(points, scale_matrix)
+        points *= obj_scale
         # render model in the middle of the reference surface. To do so,
         # model points must be displaced
         points = np.array([[p[0] + w / 2, p[1] + h / 2, p[2]] for p in points])
@@ -55,7 +56,7 @@ def render(img, obj, projection, target_height, target_width, color=False):
             cv2.fillConvexPoly(img, imgpts, color)
 
     return img
-    
+
 
 def projection_matrix(camera_parameters, homography):
     """
@@ -96,12 +97,15 @@ if __name__ == '__main__':
     morph_trackbar = TrackbarSettings('Settings', 'Morph Size Struct', 2, 30)
 
     qrDecoder = cv2.QRCodeDetector()
-    obj_dir = "../assets/pirate-ship-fat.obj"
+    obj_dir = "../assets/models/fox.obj"
     obj = OBJ(obj_dir, swapyz=True)
 
     camera_parameters = [[539.5314058058052, 0.0, 213.90895733662572],
                          [0.0, 543.5813662750779, 275.7850229389913],
                          [0.0, 0.0, 1.0]]
+    # camera_parameters = [[539, 0, 213],
+    #                      [0, 543, 275],
+    #                      [0, 0, 1]]
 
     qr_image = cv2.imread("../assets/QR_1.png")
     qr_height, qr_width, _ = qr_image.shape
@@ -126,8 +130,7 @@ if __name__ == '__main__':
         if bbox is not None:
             src_pts = np.float32(original_bbox)
             dst_pts = np.float32(bbox)
-            print(src_pts)
-            # warped_img, homography = rect_homography(cam_frame, bbox)
+            # Find homography between original QR image and target/destination image
             homography, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
 
             # obtain 3D projection matrix from homography matrix and camera parameters
@@ -137,9 +140,7 @@ if __name__ == '__main__':
                 try:
                     # obtain 3D projection matrix from homography matrix and camera parameters
                     projection = projection_matrix(camera_parameters, homography)
-
                     cam_frame = render(cam_frame, obj, projection, qr_height, qr_width, False)
-                    # frame = render(frame, model, projection)
                 except:
                     pass
 
