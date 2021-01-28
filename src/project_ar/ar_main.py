@@ -30,7 +30,7 @@ def hex_to_rgb(hex_color):
     return tuple(int(hex_color[i:i + h_len // 3], 16) for i in range(0, h_len, h_len // 3))
 
 
-def render(img, obj, projection, target_height, target_width, color=False, obj_scale=1):
+def render(img, obj, projection_matrix, target_height, target_width, color=False, obj_scale=1):
     """
     Render a loaded obj model into the current video frame
     """
@@ -46,7 +46,7 @@ def render(img, obj, projection, target_height, target_width, color=False, obj_s
         # render model in the middle of the reference surface. To do so,
         # model points must be displaced
         points = np.array([[p[0] + w / 2, p[1] + h / 2, p[2]] for p in points])
-        dst = cv2.perspectiveTransform(points.reshape(-1, 1, 3), projection)
+        dst = cv2.perspectiveTransform(points.reshape(-1, 1, 3), projection_matrix)
         imgpts = np.int32(dst)
         if color is False:
             cv2.fillConvexPoly(img, imgpts, DEFAULT_COLOR)
@@ -88,29 +88,33 @@ def projection_matrix(camera_parameters, homography):
 
 
 if __name__ == '__main__':
-    cap = cv2.VideoCapture(0)
-
-    threshold = 127
     main_window_name: str = 'Webcam'
 
+    cap = cv2.VideoCapture(0)
+
+    # Binary Image Settings
+    threshold = 127
     threshold_trackbar = TrackbarSettings('Settings')
     morph_trackbar = TrackbarSettings('Settings', 'Morph Size Struct', 2, 30)
 
+    qr_image = cv2.imread("../assets/QR_1.png")
+    # Opencv QR Decoder
     qrDecoder = cv2.QRCodeDetector()
+    qr_height, qr_width, _ = qr_image.shape
+    qr_bin_frame = __bin_imag__(qr_image, threshold, 1)
+    # Opencv QR Decoder main result for homography
+    original_bbox = qr_detector.__detect_bbox__(qrDecoder, bin_frame=qr_bin_frame)
+
+    # Obj to render
     obj_dir = "../assets/models/fox.obj"
     obj = OBJ(obj_dir, swapyz=True)
+    obj_scale = 1
+    # Obj scale render
+    obj_scale_trackbar = TrackbarSettings(main_window_name, 'Scale', 1, 5)
 
     camera_parameters = [[539.5314058058052, 0.0, 213.90895733662572],
                          [0.0, 543.5813662750779, 275.7850229389913],
                          [0.0, 0.0, 1.0]]
-    # camera_parameters = [[539, 0, 213],
-    #                      [0, 543, 275],
-    #                      [0, 0, 1]]
-
-    qr_image = cv2.imread("../assets/QR_1.png")
-    qr_height, qr_width, _ = qr_image.shape
-    qr_bin_frame = __bin_imag__(qr_image, threshold, 1)
-    original_bbox = qr_detector.__detect_bbox__(qrDecoder, bin_frame=qr_bin_frame)
 
     while True:
         if cv2.waitKey(1) == ord('q'): break
@@ -140,7 +144,8 @@ if __name__ == '__main__':
                 try:
                     # obtain 3D projection matrix from homography matrix and camera parameters
                     projection = projection_matrix(camera_parameters, homography)
-                    cam_frame = render(cam_frame, obj, projection, qr_height, qr_width, False)
+                    obj_scale = obj_scale_trackbar.update()
+                    cam_frame = render(cam_frame, obj, projection, qr_height, qr_width, False, obj_scale)
                 except:
                     pass
 
